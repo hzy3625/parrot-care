@@ -1,8 +1,4 @@
-"""
-Pydantic Schemas for API
-"""
-
-from pydantic import BaseModel
+﻿from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional, List
 from decimal import Decimal
@@ -29,6 +25,32 @@ class UserResponse(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+# Sprint 1: 密码重置
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: str
+
+class PasswordResetResponse(BaseModel):
+    message: str
+    success: bool
+
+# Sprint 1: 个人信息更新
+class ProfileUpdate(BaseModel):
+    nickname: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+
+class ProfileResponse(BaseModel):
+    user_id: str
+    nickname: Optional[str]
+    email: Optional[str]
+    phone: str
+    subscription_status: str
+    avatar_url: Optional[str] = None
 
 # 鹦鹉
 class ParrotCreate(BaseModel):
@@ -60,6 +82,21 @@ class ParrotSummary(BaseModel):
     night_activity_count: int
     abnormal_event_count: int
     summary: str
+
+# Sprint 1: 健康档案总览
+class HealthOverview(BaseModel):
+    parrot_id: str
+    parrot_name: str
+    species: str
+    current_health_score: int
+    health_status: str
+    avg_health_score_7days: float
+    avg_health_score_30days: float
+    total_abnormal_events_7days: int
+    total_abnormal_events_30days: int
+    health_trend: str  # improving, stable, declining
+    last_check_date: datetime
+    recommendations: List[str]
 
 # 音频事件
 class AudioUpload(BaseModel):
@@ -103,3 +140,32 @@ class FeedbackResponse(BaseModel):
     feedback_label: Optional[str]
     comment: Optional[str]
     created_at: datetime
+
+# Sprint 1: 站内消息
+class NotificationCreate(BaseModel):
+    notification_type: str
+    title: str
+    content: str
+    related_parrot_id: Optional[str] = None
+    related_event_id: Optional[str] = None
+
+class NotificationResponse(BaseModel):
+    notification_id: str
+    notification_type: str
+    title: str
+    content: str
+    is_read: bool
+    related_parrot_id: Optional[str]
+    related_event_id: Optional[str]
+    created_at: datetime
+    read_at: Optional[datetime]
+
+class NotificationListResponse(BaseModel):
+    notifications: List[NotificationResponse]
+    total: int
+    unread_count: int
+    page: int
+    page_size: int
+
+class NotificationMarkRead(BaseModel):
+    notification_ids: List[str]

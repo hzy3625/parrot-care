@@ -1,8 +1,4 @@
-"""
-数据库模型
-"""
-
-from sqlalchemy import Column, String, Integer, Boolean, Float, DateTime, ForeignKey, Text, DECIMAL
+﻿from sqlalchemy import Column, String, Integer, Boolean, Float, DateTime, ForeignKey, Text, DECIMAL
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -103,3 +99,31 @@ class BehaviorDailyStat(Base):
     quiet_minutes = Column(Integer, default=0)
     abnormal_event_count = Column(Integer, default=0)
     health_score = Column(Integer, default=100)
+
+# Sprint 1: 站内消息通知表
+class Notification(Base):
+    __tablename__ = "notifications"
+    
+    notification_id = Column(String(64), primary_key=True, default=generate_id)
+    user_id = Column(String(64), ForeignKey("users.user_id"), index=True)
+    notification_type = Column(String(50))  # system, health_alert, parrot_reminder, feature_update
+    title = Column(String(200))
+    content = Column(Text)
+    is_read = Column(Boolean, default=False)
+    related_parrot_id = Column(String(64), ForeignKey("parrots.parrot_id"), nullable=True)
+    related_event_id = Column(String(64), ForeignKey("media_events.event_id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    read_at = Column(DateTime, nullable=True)
+
+# Sprint 1: 密码重置 Token 表
+class PasswordResetToken(Base):
+    __tablename__ = "password_reset_tokens"
+    
+    token_id = Column(String(64), primary_key=True, default=generate_id)
+    user_id = Column(String(64), ForeignKey("users.user_id"), index=True)
+    token = Column(String(128), unique=True, index=True)
+    email = Column(String(100))
+    expires_at = Column(DateTime)
+    is_used = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    used_at = Column(DateTime, nullable=True)
