@@ -1,4 +1,4 @@
-﻿from pydantic import BaseModel, EmailStr
+﻿from pydantic import BaseModel, EmailStr, field_validator
 from datetime import datetime
 from typing import Optional, List
 from decimal import Decimal
@@ -34,6 +34,17 @@ class PasswordResetConfirm(BaseModel):
     token: str
     new_password: str
 
+    @field_validator('new_password')
+    @classmethod
+    def validate_password(cls, v):
+        if len(v) < 8:
+            raise ValueError('密码至少8位')
+        has_letter = any(c.isalpha() for c in v)
+        has_digit = any(c.isdigit() for c in v)
+        if not has_letter or not has_digit:
+            raise ValueError('密码必须包含字母和数字')
+        return v
+
 class PasswordResetResponse(BaseModel):
     message: str
     success: bool
@@ -43,6 +54,8 @@ class ProfileUpdate(BaseModel):
     nickname: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
+    notification_email: Optional[bool] = True
+    notification_browser: Optional[bool] = True
 
 class ProfileResponse(BaseModel):
     user_id: str
@@ -51,6 +64,8 @@ class ProfileResponse(BaseModel):
     phone: str
     subscription_status: str
     avatar_url: Optional[str] = None
+    notification_email: bool = True
+    notification_browser: bool = True
 
 # 鹦鹉
 class ParrotCreate(BaseModel):
@@ -148,6 +163,7 @@ class NotificationCreate(BaseModel):
     content: str
     related_parrot_id: Optional[str] = None
     related_event_id: Optional[str] = None
+    expires_at: Optional[datetime] = None
 
 class NotificationResponse(BaseModel):
     notification_id: str
