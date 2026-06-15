@@ -1,4 +1,4 @@
-﻿# ParrotCare AI - 鹦鹉健康行为监测系统
+# ParrotCare AI - 鹦鹉健康行为监测系统
 
 ## MVP V0.1 验证版
 
