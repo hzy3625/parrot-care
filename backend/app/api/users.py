@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """用户 API 路由 - Sprint 1 增强版"""
 
 from fastapi import APIRouter, HTTPException, Depends
@@ -20,10 +20,21 @@ from app.models.schemas import (
 )
 from app.config import settings
 from app.db import get_db
+from app.services.email_service import EmailService, send_password_reset_email
 
 router = APIRouter()
 security = HTTPBearer()
 logger = logging.getLogger(__name__)
+
+# 初始化邮件服务
+email_service = EmailService(
+    smtp_host=settings.SMTP_HOST,
+    smtp_port=settings.SMTP_PORT,
+    smtp_username=settings.SMTP_USERNAME,
+    smtp_password=settings.SMTP_PASSWORD,
+    use_tls=settings.SMTP_USE_TLS,
+    from_email=settings.SMTP_FROM_EMAIL
+)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -140,7 +151,8 @@ async def request_password_reset(
     await db.commit()
     
     reset_link = f"http://localhost:8000/reset-password?token={reset_token}"
-    logger.info(f"\n========== 密码重置邮件 (Mock) ==========\n收件人: {user.email}\n链接: {reset_link}\n========================================\n")
+    # 发送密码重置邮件（如果 SMTP 配置为空，会自动降级为 Mock 模式）
+    await send_password_reset_email(email_service, user.email, reset_link)
     
     return PasswordResetResponse(message="如果邮箱存在，重置链接已发送", success=True)
 
@@ -171,6 +183,14 @@ async def confirm_password_reset(
     
     if not user:
         raise HTTPException(status_code=404, detail="用户不存在")
+    
+    # 密码强度校验
+    if len(reset_data.new_password) < 8:
+        raise HTTPException(status_code=400, detail="密码至少8位，需包含字母和数字")
+    has_letter = any(c.isalpha() for c in reset_data.new_password)
+    has_digit = any(c.isdigit() for c in reset_data.new_password)
+    if not has_letter or not has_digit:
+        raise HTTPException(status_code=400, detail="密码必须包含字母和数字")
     
     user.password_hash = hash_password(reset_data.new_password)
     token_record.is_used = True
@@ -269,3 +289,6 @@ async def update_profile(
         notification_email=getattr(current_user, 'notification_email', True),
         notification_browser=getattr(current_user, 'notification_browser', True),
     )
+
+
+    await send_password_reset_email(email_service, user.email, reset_link)

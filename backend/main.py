@@ -1,4 +1,4 @@
-﻿ParrotCare AI Backend - FastAPI Application - V0.4 Sprint 1
+﻿"""ParrotCare AI Backend - FastAPI Application - V0.4 Sprint 1
 """
 
 import sys

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 测试配置 - Sprint 1 自动化测试
 提供 fixtures: async client, db session, test user
@@ -32,6 +32,7 @@ test_session_maker = async_sessionmaker(test_engine, class_=AsyncSession, expire
 @pytest_asyncio.fixture(scope="function")
 async def db_session():
     async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
     
     async with test_session_maker() as session:

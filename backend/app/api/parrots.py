@@ -1,4 +1,4 @@
-﻿鹦鹉 API 路由 - Sprint 1 增强版
+﻿"""鹦鹉 API 路由 - Sprint 1 增强版
 """
 
 from fastapi import APIRouter, HTTPException, Depends

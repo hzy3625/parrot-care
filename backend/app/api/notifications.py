@@ -1,4 +1,4 @@
-﻿站内消息 API 路由 - Sprint 1
+﻿"""站内消息 API 路由 - Sprint 1
 """
 
 from fastapi import APIRouter, HTTPException, Depends, Query

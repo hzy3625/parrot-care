@@ -34,17 +34,6 @@ class PasswordResetConfirm(BaseModel):
     token: str
     new_password: str
 
-    @field_validator('new_password')
-    @classmethod
-    def validate_password(cls, v):
-        if len(v) < 8:
-            raise ValueError('密码至少8位')
-        has_letter = any(c.isalpha() for c in v)
-        has_digit = any(c.isdigit() for c in v)
-        if not has_letter or not has_digit:
-            raise ValueError('密码必须包含字母和数字')
-        return v
-
 class PasswordResetResponse(BaseModel):
     message: str
     success: bool

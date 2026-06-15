@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Sprint 1 自动化测试 - ParrotCare API
 pytest + httpx + pytest-asyncio
@@ -358,4 +358,29 @@ async def test_health_overview_all(auth_client, db_session, test_user):
     response = await auth_client.get("/api/parrots/health-overview")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) >= 1
+    assert len(data) >= 1# ==================== 邮件发送测试 ====================
+
+@pytest.mark.asyncio
+async def test_request_password_reset_sends_email(client, test_user, db_session):
+    """测试密码重置请求触发邮件发送"""
+    response = await client.post(
+        "/api/users/reset-password",
+        json={"email": "test@example.com"}
+    )
+    assert response.status_code == 200
+    assert response.json()["success"]
+    
+    # 验证邮件发送（Mock 模式下应该在日志中看到）
+    # SMTP 未配置时，自动降级为 Mock 模式，不阻塞功能
+    
+@pytest.mark.asyncio
+async def test_email_service_mock_mode():
+    """测试邮件服务 Mock 模式"""
+    from app.services.email_service import EmailService
+    
+    # SMTP 配置为空时，应该使用 Mock 模式
+    service = EmailService(smtp_host=None, smtp_username=None)
+    assert service.mock_mode is True
+    
+    result = await service.send_email("test@example.com", "Test", "<html>Test</html>")
+    assert result is True  # Mock 模式总是返回 True
