@@ -1,9 +1,9 @@
-锘縡rom pydantic import BaseModel, EmailStr, field_validator
+﻿from pydantic import BaseModel, EmailStr, field_validator
 from datetime import datetime
 from typing import Optional, List
 from decimal import Decimal
 
-# 鐢ㄦ埛
+# 用户
 class UserCreate(BaseModel):
     phone: str
     password: str
@@ -26,7 +26,7 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
-# Sprint 1: 瀵嗙爜閲嶇疆
+# Sprint 1: 密码重置
 class PasswordResetRequest(BaseModel):
     email: EmailStr
 
@@ -38,18 +38,18 @@ class PasswordResetConfirm(BaseModel):
     @classmethod
     def validate_password(cls, v):
         if len(v) < 8:
-            raise ValueError('瀵嗙爜鑷冲皯8浣?)
+            raise ValueError('密码至少8位')
         has_letter = any(c.isalpha() for c in v)
         has_digit = any(c.isdigit() for c in v)
         if not has_letter or not has_digit:
-            raise ValueError('瀵嗙爜蹇呴』鍖呭惈瀛楁瘝鍜屾暟瀛?)
+            raise ValueError('密码必须包含字母和数字')
         return v
 
 class PasswordResetResponse(BaseModel):
     message: str
     success: bool
 
-# Sprint 1: 涓汉淇℃伅鏇存柊
+# Sprint 1: 个人信息更新
 class ProfileUpdate(BaseModel):
     nickname: Optional[str] = None
     email: Optional[EmailStr] = None
@@ -67,7 +67,7 @@ class ProfileResponse(BaseModel):
     notification_email: bool = True
     notification_browser: bool = True
 
-# 楣﹂箟
+# 鹦鹉
 class ParrotCreate(BaseModel):
     name: str
     species: str
@@ -98,7 +98,7 @@ class ParrotSummary(BaseModel):
     abnormal_event_count: int
     summary: str
 
-# Sprint 1: 鍋ュ悍妗ｆ鎬昏
+# Sprint 1: 健康档案总览
 class HealthOverview(BaseModel):
     parrot_id: str
     parrot_name: str
@@ -113,7 +113,7 @@ class HealthOverview(BaseModel):
     last_check_date: datetime
     recommendations: List[str]
 
-# 闊抽浜嬩欢
+# 音频事件
 class AudioUpload(BaseModel):
     parrot_id: str
     device_id: Optional[str] = None
@@ -142,7 +142,7 @@ class EventDetail(BaseModel):
     confidence: Optional[Decimal]
     created_at: datetime
 
-# 鐢ㄦ埛鍙嶉
+# 用户反馈
 class FeedbackCreate(BaseModel):
     feedback_type: str
     feedback_label: Optional[str] = None
@@ -156,7 +156,7 @@ class FeedbackResponse(BaseModel):
     comment: Optional[str]
     created_at: datetime
 
-# Sprint 1: 绔欏唴娑堟伅
+# Sprint 1: 站内消息
 class NotificationCreate(BaseModel):
     notification_type: str
     title: str

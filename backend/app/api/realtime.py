@@ -1,5 +1,5 @@
 """
-瀹炴椂闊抽鍒嗘瀽 API - REQ-PARROT-003
+实时音频分析 API - REQ-PARROT-003
 """
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -36,8 +36,8 @@ async def realtime_analyze(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """瀹炴椂闊抽鍒嗘瀽"""
-    # 瑙ｇ爜 base64
+    """实时音频分析"""
+    # 解码 base64
     import base64
     audio_data = base64.b64decode(request.audio_data)
     
@@ -58,6 +58,6 @@ async def get_parrot_stats(
     parrot_id: str,
     current_user: User = Depends(get_current_user)
 ):
-    """鑾峰彇楣﹂箟瀹炴椂缁熻"""
+    """获取鹦鹉实时统计"""
     stats = await analyzer.get_parrot_stats(parrot_id)
     return stats

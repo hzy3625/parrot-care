@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 
 Base = declarative_base()
 
-# 瀵嗙爜鍝堝笇涓婁笅鏂囷紙bcrypt锛?
+# 密码哈希上下文（bcrypt）
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def generate_id():
@@ -23,12 +23,12 @@ class User(Base):
     password_hash = Column(String(255))
     subscription_status = Column(String(30), default="free")
     
-    # Sprint 1 鏂板瀛楁
+    # Sprint 1 新增字段
     notification_email = Column(Boolean, default=True)
     notification_browser = Column(Boolean, default=True)
     email_verified = Column(Boolean, default=False)
-    dnd_start = Column(Time, nullable=True)  # Do Not Disturb 寮€濮嬫椂闂?
-    dnd_end = Column(Time, nullable=True)    # Do Not Disturb 缁撴潫鏃堕棿
+    dnd_start = Column(Time, nullable=True)  # Do Not Disturb 开始时间
+    dnd_end = Column(Time, nullable=True)    # Do Not Disturb 结束时间
     
     created_at = Column(DateTime, default=datetime.utcnow)
     
@@ -112,7 +112,7 @@ class BehaviorDailyStat(Base):
     abnormal_event_count = Column(Integer, default=0)
     health_score = Column(Integer, default=100)
 
-# Sprint 1: 绔欏唴娑堟伅閫氱煡
+# Sprint 1: 站内消息通知
 class Notification(Base):
     __tablename__ = "notifications"
     
@@ -125,13 +125,13 @@ class Notification(Base):
     related_parrot_id = Column(String(64), ForeignKey("parrots.parrot_id"), nullable=True)
     related_event_id = Column(String(64), ForeignKey("media_events.event_id"), nullable=True)
     
-    # Sprint 1 鏂板瀛楁
-    expires_at = Column(DateTime, nullable=True)  # 娑堟伅杩囨湡鏃堕棿
+    # Sprint 1 新增字段
+    expires_at = Column(DateTime, nullable=True)  # 消息过期时间
     
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     read_at = Column(DateTime, nullable=True)
 
-# Sprint 1: 瀵嗙爜閲嶇疆 Token 琛?
+# Sprint 1: 密码重置 Token 表
 class PasswordResetToken(Base):
     __tablename__ = "password_reset_tokens"
     
@@ -144,7 +144,7 @@ class PasswordResetToken(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     used_at = Column(DateTime, nullable=True)
 
-# Sprint 1: 瀵嗙爜閲嶇疆棰戠巼闄愬埗琛?
+# Sprint 1: 密码重置频率限制表
 class PasswordResetRateLimit(Base):
     __tablename__ = "password_reset_rate_limits"
     

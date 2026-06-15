@@ -1,13 +1,13 @@
 // ParrotCare AI - Frontend Application (V0.4 Sprint 1)
-// 鍘熺敓 JavaScript 瀹炵幇锛屾棤妗嗘灦渚濊禆
+// 原生 JavaScript 实现，无框架依赖
 
-// ==================== 鍏ㄥ眬閰嶇疆 ====================
+// ==================== 全局配置 ====================
 const API_BASE_URL = 'http://localhost:8000/api';
 let currentToken = localStorage.getItem('access_token') || null;
 let currentParrotId = null;
 
-// ==================== 宸ュ叿鍑芥暟 ====================
-// API 璇锋眰灏佽
+// ==================== 工具函数 ====================
+// API 请求封装
 async function apiRequest(endpoint, method = 'GET', data = null, requiresAuth = true) {
     const url = `${API_BASE_URL}${endpoint}`;
     const headers = {
@@ -32,33 +32,33 @@ async function apiRequest(endpoint, method = 'GET', data = null, requiresAuth = 
         
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.detail || '璇锋眰澶辫触');
+            throw new Error(errorData.detail || '请求失败');
         }
         
         return await response.json();
     } catch (error) {
-        console.error('API璇锋眰澶辫触:', error);
+        console.error('API请求失败:', error);
         throw error;
     }
 }
 
-// 瀵嗙爜寮哄害鏍￠獙锛堝墠绔級
+// 密码强度校验（前端）
 function validatePasswordStrength(password) {
     if (password.length < 8) {
-        return { valid: false, message: '瀵嗙爜闀垮害鑷冲皯8浣? };
+        return { valid: false, message: '密码长度至少8位' };
     }
     
     const hasLetter = /[a-zA-Z]/.test(password);
     const hasNumber = /[0-9]/.test(password);
     
     if (!hasLetter || !hasNumber) {
-        return { valid: false, message: '瀵嗙爜蹇呴』鍖呭惈瀛楁瘝鍜屾暟瀛? };
+        return { valid: false, message: '密码必须包含字母和数字' };
     }
     
-    return { valid: true, message: '瀵嗙爜寮哄害鍚堟牸' };
+    return { valid: true, message: '密码强度合格' };
 }
 
-// 鏄剧ず鎻愮ず淇℃伅
+// 显示提示信息
 function showAlert(message, type = 'info') {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
@@ -75,8 +75,8 @@ function showAlert(message, type = 'info') {
     setTimeout(() => alertDiv.remove(), 5000);
 }
 
-// ==================== 1. 鐢ㄦ埛璁よ瘉 ====================
-// 鐧诲綍
+// ==================== 1. 用户认证 ====================
+// 登录
 async function login(phone, password) {
     try {
         const response = await apiRequest('/users/login', 'POST', 
@@ -85,17 +85,17 @@ async function login(phone, password) {
         currentToken = response.access_token;
         localStorage.setItem('access_token', currentToken);
         
-        showAlert('鐧诲綍鎴愬姛锛?, 'success');
+        showAlert('登录成功！', 'success');
         showHomePage();
         
-        // 鍔犺浇棣栭〉鏁版嵁
+        // 加载首页数据
         await loadHomePageData();
     } catch (error) {
-        showAlert(`鐧诲綍澶辫触: ${error.message}`, 'danger');
+        showAlert(`登录失败: ${error.message}`, 'danger');
     }
 }
 
-// 娉ㄥ唽
+// 注册
 async function register(phone, password, nickname, email) {
     try {
         const response = await apiRequest('/users/register', 'POST', 
@@ -104,40 +104,40 @@ async function register(phone, password, nickname, email) {
         currentToken = response.access_token;
         localStorage.setItem('access_token', currentToken);
         
-        showAlert('娉ㄥ唽鎴愬姛锛?, 'success');
+        showAlert('注册成功！', 'success');
         showHomePage();
         await loadHomePageData();
     } catch (error) {
-        showAlert(`娉ㄥ唽澶辫触: ${error.message}`, 'danger');
+        showAlert(`注册失败: ${error.message}`, 'danger');
     }
 }
 
-// 閫€鍑虹櫥褰?
+// 退出登录
 function logout() {
     currentToken = null;
     localStorage.removeItem('access_token');
     currentParrotId = null;
     
-    showAlert('宸查€€鍑虹櫥褰?, 'info');
+    showAlert('已退出登录', 'info');
     showLoginPage();
 }
 
-// ==================== 2. 瀵嗙爜閲嶇疆锛圧EQ-PARROT-011锛?====================
-// 鍙戣捣閲嶇疆
+// ==================== 2. 密码重置（REQ-PARROT-011） ====================
+// 发起重置
 async function requestPasswordReset(email) {
     try {
         await apiRequest('/users/reset-password', 'POST', { email }, false);
         
-        showAlert('閲嶇疆閭欢宸插彂閫侊紝璇锋鏌ラ偖绠?, 'success');
+        showAlert('重置邮件已发送，请检查邮箱', 'success');
         showResetSuccess();
     } catch (error) {
-        showAlert(`璇锋眰澶辫触: ${error.message}`, 'danger');
+        showAlert(`请求失败: ${error.message}`, 'danger');
     }
 }
 
-// 纭閲嶇疆锛堜粠URL鑾峰彇token锛?
+// 确认重置（从URL获取token）
 async function confirmPasswordReset(token, newPassword) {
-    // 鍓嶇瀵嗙爜寮哄害鏍￠獙
+    // 前端密码强度校验
     const validation = validatePasswordStrength(newPassword);
     if (!validation.valid) {
         showAlert(validation.message, 'warning');
@@ -148,21 +148,21 @@ async function confirmPasswordReset(token, newPassword) {
         await apiRequest(`/users/reset-password/${token}`, 'POST', 
             { token, new_password: newPassword }, false);
         
-        showAlert('瀵嗙爜宸查噸缃紝璇蜂娇鐢ㄦ柊瀵嗙爜鐧诲綍', 'success');
+        showAlert('密码已重置，请使用新密码登录', 'success');
         showLoginPage();
         return true;
     } catch (error) {
-        if (error.message.includes('棰戠箒')) {
-            showAlert('鎿嶄綔杩囦簬棰戠箒锛岃绋嶅悗鍐嶈瘯', 'warning');
+        if (error.message.includes('频繁')) {
+            showAlert('操作过于频繁，请稍后再试', 'warning');
         } else {
-            showAlert(`閲嶇疆澶辫触: ${error.message}`, 'danger');
+            showAlert(`重置失败: ${error.message}`, 'danger');
         }
         return false;
     }
 }
 
-// ==================== 3. 绔欏唴娑堟伅涓績锛圧EQ-PARROT-005锛?====================
-// 鍔犺浇娑堟伅鍒楄〃锛堝垎椤点€佺瓫閫夛級
+// ==================== 3. 站内消息中心（REQ-PARROT-005） ====================
+// 加载消息列表（分页、筛选）
 async function loadNotifications(page = 1, pageSize = 20, unreadOnly = false, notificationType = null) {
     try {
         let endpoint = `/notifications?page=${page}&page_size=${pageSize}`;
@@ -173,17 +173,17 @@ async function loadNotifications(page = 1, pageSize = 20, unreadOnly = false, no
         
         renderNotificationsList(response.notifications);
         
-        // 鏇存柊鎬绘暟鏄剧ず
+        // 更新总数显示
         document.getElementById('notification-total').textContent = response.total;
         document.getElementById('notification-unread').textContent = response.unread_count;
         
         return response;
     } catch (error) {
-        showAlert(`鍔犺浇娑堟伅澶辫触: ${error.message}`, 'danger');
+        showAlert(`加载消息失败: ${error.message}`, 'danger');
     }
 }
 
-// 鏈璁℃暟锛堟洿鏂板鑸爮绾㈢偣锛?
+// 未读计数（更新导航栏红点）
 async function updateNotificationBadge() {
     try {
         const response = await apiRequest('/notifications/unread-count', 'GET');
@@ -196,31 +196,31 @@ async function updateNotificationBadge() {
             badge.style.display = 'none';
         }
     } catch (error) {
-        console.error('鏇存柊绾㈢偣澶辫触:', error);
+        console.error('更新红点失败:', error);
     }
 }
 
-// 鏍囪鍗曟潯宸茶
+// 标记单条已读
 async function markNotificationRead(notificationId) {
     try {
         await apiRequest(`/notifications/${notificationId}/read`, 'PATCH');
         
-        // 鍒锋柊鍒楄〃鍜岀孩鐐?
+        // 刷新列表和红点
         await updateNotificationBadge();
         await loadNotifications();
     } catch (error) {
-        showAlert(`鏍囪澶辫触: ${error.message}`, 'danger');
+        showAlert(`标记失败: ${error.message}`, 'danger');
     }
 }
 
-// 鍏ㄩ儴鏍囪宸茶
+// 全部标记已读
 async function markAllNotificationsRead() {
     try {
-        // 鑾峰彇鎵€鏈夋湭璇绘秷鎭疘D
+        // 获取所有未读消息ID
         const response = await apiRequest('/notifications?unread_only=true&page_size=100', 'GET');
         
         if (response.notifications.length === 0) {
-            showAlert('娌℃湁鏈娑堟伅', 'info');
+            showAlert('没有未读消息', 'info');
             return;
         }
         
@@ -228,33 +228,33 @@ async function markAllNotificationsRead() {
         await apiRequest('/notifications/mark-read', 'PATCH', 
             { notification_ids: notificationIds });
         
-        showAlert('鍏ㄩ儴鏍囪宸茶', 'success');
+        showAlert('全部标记已读', 'success');
         await updateNotificationBadge();
         await loadNotifications();
     } catch (error) {
-        showAlert(`鎿嶄綔澶辫触: ${error.message}`, 'danger');
+        showAlert(`操作失败: ${error.message}`, 'danger');
     }
 }
 
-// 鍒犻櫎娑堟伅
+// 删除消息
 async function deleteNotification(notificationId) {
     try {
         await apiRequest(`/notifications/${notificationId}`, 'DELETE');
         
-        showAlert('娑堟伅宸插垹闄?, 'success');
+        showAlert('消息已删除', 'success');
         await updateNotificationBadge();
         await loadNotifications();
     } catch (error) {
-        showAlert(`鍒犻櫎澶辫触: ${error.message}`, 'danger');
+        showAlert(`删除失败: ${error.message}`, 'danger');
     }
 }
 
-// 鎸夌被鍨嬬瓫閫夋秷鎭?
+// 按类型筛选消息
 async function filterNotificationsByType(type) {
     await loadNotifications(1, 20, false, type);
 }
 
-// 娓叉煋娑堟伅鍒楄〃
+// 渲染消息列表
 function renderNotificationsList(notifications) {
     const listDiv = document.getElementById('notification-list');
     if (!listDiv) return;
@@ -262,7 +262,7 @@ function renderNotificationsList(notifications) {
     listDiv.innerHTML = '';
     
     if (notifications.length === 0) {
-        listDiv.innerHTML = '<div class="text-center text-muted">鏆傛棤娑堟伅</div>';
+        listDiv.innerHTML = '<div class="text-center text-muted">暂无消息</div>';
         return;
     }
     
@@ -272,14 +272,14 @@ function renderNotificationsList(notifications) {
         item.style.className = 'p-3 mb-2 rounded border';
         
         const typeIcon = {
-            'system': '馃敂',
-            'health_alert': '鈿狅笍',
-            'parrot_reminder': '馃惁',
-            'feature_update': '鉁?
-        }[n.notification_type] || '馃搶';
+            'system': '🔔',
+            'health_alert': '⚠️',
+            'parrot_reminder': '🐦',
+            'feature_update': '✨'
+        }[n.notification_type] || '📌';
         
         const readBtn = !n.is_read ? 
-            '<button class="btn btn-sm btn-outline-primary" onclick="markNotificationRead('' + n.notification_id + '')">鏍囪宸茶</button>' : '';
+            '<button class="btn btn-sm btn-outline-primary" onclick="markNotificationRead('' + n.notification_id + '')">标记已读</button>' : '';
         
         item.innerHTML = `
             <div class="d-flex justify-content-between">
@@ -290,7 +290,7 @@ function renderNotificationsList(notifications) {
                 </div>
                 <div>
                     ${readBtn}
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteNotification('${n.notification_id}')">鍒犻櫎</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteNotification('${n.notification_id}')">删除</button>
                 </div>
             </div>
         `;
@@ -299,8 +299,8 @@ function renderNotificationsList(notifications) {
     });
 }
 
-// ==================== 4. 鍋ュ悍妗ｆ鎬昏锛圧EQ-PARROT-009锛?====================
-// 鍔犺浇鎵€鏈夐功楣夊仴搴锋暟鎹?
+// ==================== 4. 健康档案总览（REQ-PARROT-009） ====================
+// 加载所有鹦鹉健康数据
 async function loadAllHealthOverview() {
     try {
         const overviews = await apiRequest('/parrots/health-overview', 'GET');
@@ -308,11 +308,11 @@ async function loadAllHealthOverview() {
         renderHealthCards(overviews);
         return overviews;
     } catch (error) {
-        showAlert(`鍔犺浇鍋ュ悍妗ｆ澶辫触: ${error.message}`, 'danger');
+        showAlert(`加载健康档案失败: ${error.message}`, 'danger');
     }
 }
 
-// 娓叉煋鍋ュ悍鍗＄墖锛堣瘎鍒嗛鑹叉爣璇嗭級
+// 渲染健康卡片（评分颜色标识）
 function renderHealthCards(overviews) {
     const container = document.getElementById('health-overview-container');
     if (!container) return;
@@ -320,7 +320,7 @@ function renderHealthCards(overviews) {
     container.innerHTML = '';
     
     if (overviews.length === 0) {
-        container.innerHTML = '<div class="text-center text-muted">鏆傛棤楣﹂箟</div>';
+        container.innerHTML = '<div class="text-center text-muted">暂无鹦鹉</div>';
         return;
     }
     
@@ -328,7 +328,7 @@ function renderHealthCards(overviews) {
         const card = document.createElement('div');
         card.className = 'col-md-4 mb-3';
         
-        // 璇勫垎棰滆壊锛?=80 缁胯壊銆?0-79 榛勮壊銆?60 鐓冭壊
+        // 评分颜色：>=80 绿色、60-79 黄色、<60 煃色
         let scoreColor = '';
         let scoreClass = '';
         if (overview.current_health_score >= 80) {
@@ -342,40 +342,40 @@ function renderHealthCards(overviews) {
             scoreClass = 'status-danger';
         }
         
-        // 瓒嬪娍鍥炬爣
+        // 趋势图标
         let trendIcon = '';
         let trendClass = '';
         if (overview.health_trend === 'improving') {
-            trendIcon = '馃搱';
+            trendIcon = '📈';
             trendClass = 'health-trend-up';
         } else if (overview.health_trend === 'declining') {
-            trendIcon = '馃搲';
+            trendIcon = '📉';
             trendClass = 'health-trend-down';
         } else {
-            trendIcon = '鉃★笍';
+            trendIcon = '➡️';
             trendClass = 'health-trend-stable';
         }
         
         card.innerHTML = `
             <div class="card card-hover shadow h-100" onclick="viewParrotDetail('${overview.parrot_id}')">
                 <div class="card-body">
-                    <h5 class="card-title">馃 ${overview.parrot_name}</h5>
+                    <h5 class="card-title">🦜 ${overview.parrot_name}</h5>
                     <p class="text-muted">${overview.species}</p>
                     <div class="display-4 ${scoreClass}" style="color: ${scoreColor}">
                         ${overview.current_health_score}
                     </div>
-                    <small class="text-muted">鍋ュ悍璇勫垎</small>
+                    <small class="text-muted">健康评分</small>
                     <div class="mt-2">
                         <span class="${trendClass}">${trendIcon} ${overview.health_status}</span>
                     </div>
                     <div class="row mt-3 text-center">
                         <div class="col-6">
                             <strong>${overview.avg_health_score_7days}</strong>
-                            <small class="text-muted">7鏃ュ钩鍧?/small>
+                            <small class="text-muted">7日平均</small>
                         </div>
                         <div class="col-6">
                             <strong>${overview.total_abnormal_events_7days}</strong>
-                            <small class="text-muted">7鏃ュ紓甯?/small>
+                            <small class="text-muted">7日异常</small>
                         </div>
                     </div>
                 </div>
@@ -386,15 +386,15 @@ function renderHealthCards(overviews) {
     });
 }
 
-// 鐐瑰嚮璺宠浆鍒板崟涓功楣夎鎯呴〉
+// 点击跳转到单个鹦鹉详情页
 function viewParrotDetail(parrotId) {
     currentParrotId = parrotId;
-    // TODO: 瀹炵幇璇︽儏椤佃烦杞€昏緫
-    showAlert('姝ｅ湪鍔犺浇楣﹂箟 ' + parrotId + ' 鐨勮鎯?..', 'info');
+    // TODO: 实现详情页跳转逻辑
+    showAlert('正在加载鹦鹉 ' + parrotId + ' 的详情...', 'info');
 }
 
-// ==================== 5. 涓汉淇℃伅绠＄悊锛圧EQ-PARROT-012锛?====================
-// 鍔犺浇涓汉淇℃伅
+// ==================== 5. 个人信息管理（REQ-PARROT-012） ====================
+// 加载个人信息
 async function loadUserProfile() {
     try {
         const profile = await apiRequest('/users/profile', 'GET');
@@ -405,26 +405,26 @@ async function loadUserProfile() {
         
         return profile;
     } catch (error) {
-        showAlert(`鍔犺浇涓汉淇℃伅澶辫触: ${error.message}`, 'danger');
+        showAlert(`加载个人信息失败: ${error.message}`, 'danger');
     }
 }
 
-// 鏇存柊涓汉淇℃伅
+// 更新个人信息
 async function updateProfile(nickname, email, phone) {
     try {
         const profile = await apiRequest('/users/profile', 'PUT', 
             { nickname, email, phone });
         
-        showAlert('涓汉淇℃伅宸叉洿鏂?, 'success');
+        showAlert('个人信息已更新', 'success');
         return profile;
     } catch (error) {
-        showAlert(`鏇存柊澶辫触: ${error.message}`, 'danger');
+        showAlert(`更新失败: ${error.message}`, 'danger');
     }
 }
 
-// 淇敼瀵嗙爜
+// 修改密码
 async function changePassword(oldPassword, newPassword) {
-    // 鍓嶇瀵嗙爜寮哄害鏍￠獙
+    // 前端密码强度校验
     const validation = validatePasswordStrength(newPassword);
     if (!validation.valid) {
         showAlert(validation.message, 'warning');
@@ -435,23 +435,23 @@ async function changePassword(oldPassword, newPassword) {
         await apiRequest('/users/me/change-password', 'POST', 
             { old_password: oldPassword, new_password: newPassword });
         
-        showAlert('瀵嗙爜宸蹭慨鏀癸紝璇烽噸鏂扮櫥褰?, 'success');
+        showAlert('密码已修改，请重新登录', 'success');
         logout();
         return true;
     } catch (error) {
-        showAlert(`淇敼澶辫触: ${error.message}`, 'danger');
+        showAlert(`修改失败: ${error.message}`, 'danger');
         return false;
     }
 }
 
-// 閫氱煡鍋忓ソ璁剧疆锛堝瓨鍌ㄥ埌localStorage锛?
+// 通知偏好设置（存储到localStorage）
 function saveNotificationPreferences(emailNotify, browserNotify) {
     localStorage.setItem('notification_email', emailNotify);
     localStorage.setItem('notification_browser', browserNotify);
-    showAlert('閫氱煡鍋忓ソ宸蹭繚瀛?, 'success');
+    showAlert('通知偏好已保存', 'success');
 }
 
-// ==================== 椤甸潰鍒囨崲閫昏緫 ====================
+// ==================== 页面切换逻辑 ====================
 function showLoginPage() {
     hideAllPages();
     document.getElementById('login-page').style.display = 'flex';
@@ -486,19 +486,19 @@ function hideAllPages() {
     document.getElementById('home-page').style.display = 'none';
 }
 
-// 鍔犺浇棣栭〉鏁版嵁
+// 加载首页数据
 async function loadHomePageData() {
-    // 鍔犺浇楣﹂箟鍒楄〃
+    // 加载鹦鹉列表
     await loadParrotsList();
     
-    // 鏇存柊娑堟伅绾㈢偣
+    // 更新消息红点
     await updateNotificationBadge();
     
-    // 鍔犺浇鍋ュ悍鎬昏
+    // 加载健康总览
     await loadAllHealthOverview();
 }
 
-// 鍔犺浇楣﹂箟鍒楄〃
+// 加载鹦鹉列表
 async function loadParrotsList() {
     try {
         const parrots = await apiRequest('/parrots', 'GET');
@@ -509,7 +509,7 @@ async function loadParrotsList() {
         listDiv.innerHTML = '';
         
         if (parrots.length === 0) {
-            listDiv.innerHTML = '<div class="text-muted">鏆傛棤楣﹂箟锛岃娣诲姞</div>';
+            listDiv.innerHTML = '<div class="text-muted">暂无鹦鹉，请添加</div>';
             return;
         }
         
@@ -517,30 +517,30 @@ async function loadParrotsList() {
             const item = document.createElement('div');
             item.className = 'mb-2 p-2 border rounded';
             item.innerHTML = `
-                <strong>馃 ${p.name}</strong>
+                <strong>🦜 ${p.name}</strong>
                 <span class="text-muted ml-2">${p.species}</span>
                 <button class="btn btn-sm btn-outline-secondary float-right" 
                     onclick="selectParrot('${p.parrot_id}', '${p.name}')">
-                    閫夋嫨
+                    选择
                 </button>
             `;
             listDiv.appendChild(item);
         });
     } catch (error) {
-        console.error('鍔犺浇楣﹂箟鍒楄〃澶辫触:', error);
+        console.error('加载鹦鹉列表失败:', error);
     }
 }
 
-// 閫夋嫨楣﹂箟
+// 选择鹦鹉
 function selectParrot(parrotId, parrotName) {
     currentParrotId = parrotId;
     document.getElementById('parrot-name').textContent = parrotName;
     
-    // 鍔犺浇浠婃棩鎽樿
+    // 加载今日摘要
     loadTodaySummary(parrotId);
 }
 
-// 鍔犺浇浠婃棩鎽樿
+// 加载今日摘要
 async function loadTodaySummary(parrotId) {
     try {
         const summary = await apiRequest(`/parrots/${parrotId}/today-summary`, 'GET');
@@ -550,7 +550,7 @@ async function loadTodaySummary(parrotId) {
         document.getElementById('scream-count').textContent = summary.scream_count;
         document.getElementById('status-summary').textContent = summary.summary;
         
-        // 鏍规嵁璇勫垎璁剧疆棰滆壊
+        // 根据评分设置颜色
         const scoreDiv = document.getElementById('health-score');
         if (summary.health_score >= 80) {
             scoreDiv.className = 'display-4 status-healthy';
@@ -560,13 +560,13 @@ async function loadTodaySummary(parrotId) {
             scoreDiv.className = 'display-4 status-danger';
         }
     } catch (error) {
-        console.error('鍔犺浇浠婃棩鎽樿澶辫触:', error);
+        console.error('加载今日摘要失败:', error);
     }
 }
 
-// ==================== 浜嬩欢缁戝畾 ====================
+// ==================== 事件绑定 ====================
 document.addEventListener('DOMContentLoaded', function() {
-    // 妫€鏌ユ槸鍚﹀凡鐧诲綍
+    // 检查是否已登录
     if (currentToken) {
         showHomePage();
         loadHomePageData();
@@ -574,7 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showLoginPage();
     }
     
-    // 鐧诲綍琛ㄥ崟
+    // 登录表单
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', async function(e) {
@@ -585,7 +585,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 娉ㄥ唽琛ㄥ崟
+    // 注册表单
     const registerForm = document.getElementById('register-form');
     if (registerForm) {
         registerForm.addEventListener('submit', async function(e) {
@@ -598,7 +598,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 娉ㄥ唽閾炬帴
+    // 注册链接
     const registerLink = document.getElementById('register-link');
     if (registerLink) {
         registerLink.addEventListener('click', function(e) {
@@ -607,7 +607,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 杩斿洖鐧诲綍閾炬帴
+    // 返回登录链接
     const backLoginLink = document.getElementById('back-login-link');
     if (backLoginLink) {
         backLoginLink.addEventListener('click', function(e) {
@@ -616,7 +616,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 蹇樿瀵嗙爜閾炬帴
+    // 忘记密码链接
     const forgotPasswordLink = document.getElementById('forgot-password-link');
     if (forgotPasswordLink) {
         forgotPasswordLink.addEventListener('click', function(e) {
@@ -625,7 +625,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 鍙戣捣閲嶇疆鎸夐挳
+    // 发起重置按钮
     const requestResetBtn = document.getElementById('request-reset-btn');
     if (requestResetBtn) {
         requestResetBtn.addEventListener('click', async function() {
@@ -634,7 +634,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 杩斿洖鐧诲綍锛堜粠閲嶇疆椤碉級
+    // 返回登录（从重置页）
     const backLoginFromReset = document.getElementById('back-login-from-reset');
     if (backLoginFromReset) {
         backLoginFromReset.addEventListener('click', function(e) {
@@ -643,7 +643,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 杩斿洖鐧诲綍锛堜粠鎴愬姛椤碉級
+    // 返回登录（从成功页）
     const backLoginFromSuccess = document.getElementById('back-login-from-success');
     if (backLoginFromSuccess) {
         backLoginFromSuccess.addEventListener('click', function(e) {
@@ -652,13 +652,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 閫€鍑虹櫥褰曟寜閽?
+    // 退出登录按钮
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', logout);
     }
     
-    // 娑堟伅涓績鎸夐挳
+    // 消息中心按钮
     const notificationBtn = document.getElementById('notification-btn');
     if (notificationBtn) {
         notificationBtn.addEventListener('click', async function() {
@@ -668,7 +668,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 涓汉淇℃伅鎸夐挳
+    // 个人信息按钮
     const profileBtn = document.getElementById('profile-btn');
     if (profileBtn) {
         profileBtn.addEventListener('click', async function() {
@@ -678,7 +678,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 鍋ュ悍鎬昏鎸夐挳
+    // 健康总览按钮
     const healthOverviewBtn = document.getElementById('health-overview-btn');
     if (healthOverviewBtn) {
         healthOverviewBtn.addEventListener('click', async function() {
@@ -687,17 +687,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 妫€鏌RL涓槸鍚︽湁瀵嗙爜閲嶇疆token
+    // 检查URL中是否有密码重置token
     const urlParams = new URLSearchParams(window.location.search);
     const resetToken = urlParams.get('token');
     if (resetToken) {
         showResetPasswordPage();
-        // 鏄剧ず纭閲嶇疆琛ㄥ崟
-        // TODO: 瀹炵幇纭閲嶇疆UI
+        // 显示确认重置表单
+        // TODO: 实现确认重置UI
     }
 });
 
-// ==================== 瀵煎嚭鍏ㄥ眬鍑芥暟锛堜緵HTML璋冪敤锛?====================
+// ==================== 导出全局函数（供HTML调用） ====================
 window.markNotificationRead = markNotificationRead;
 window.deleteNotification = deleteNotification;
 window.viewParrotDetail = viewParrotDetail;

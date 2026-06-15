@@ -1,5 +1,5 @@
 """
-闊抽 API 璺敱
+音频 API 路由
 """
 
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
@@ -25,7 +25,7 @@ async def upload_audio(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    # 楠岃瘉楣﹂箟褰掑睘
+    # 验证鹦鹉归属
     result = await db.execute(
         select(Parrot).where(
             Parrot.parrot_id == parrot_id,
@@ -34,9 +34,9 @@ async def upload_audio(
     )
     parrot = result.scalar_one_or_none()
     if not parrot:
-        raise HTTPException(status_code=404, detail="楣﹂箟涓嶅瓨鍦?)
+        raise HTTPException(status_code=404, detail="鹦鹉不存在")
     
-    # 淇濆瓨闊抽鏂囦欢
+    # 保存音频文件
     audio_id = generate_id()
     audio_path = f"media/{audio_id}.wav"
     
@@ -44,10 +44,10 @@ async def upload_audio(
         content = await audio_file.read()
         await f.write(content)
     
-    # AI 鍒嗙被
+    # AI 分类
     event_type, confidence, is_abnormal, risk_level = classify_audio(audio_path)
     
-    # 鍒涘缓浜嬩欢
+    # 创建事件
     event = MediaEvent(
         event_id=generate_id(),
         parrot_id=parrot_id,
@@ -62,7 +62,7 @@ async def upload_audio(
     db.add(event)
     await db.commit()
     
-    # 鐢熸垚寤鸿
+    # 生成建议
     suggestion = None
     if is_abnormal:
         suggestion = generate_suggestion(event_type, risk_level)
@@ -78,9 +78,9 @@ async def upload_audio(
 
 def generate_suggestion(event_type: str, risk_level: str) -> str:
     suggestions = {
-        "night_scream": "鐤戜技澶滄儕锛屽缓璁鏌ュ厜绾裤€佸櫔澹板拰绗煎竷閬尅鎯呭喌銆?,
-        "high_frequency_scream": "楂橀灏栧彨锛屽彲鑳藉簲婵€鎴栨眰鍏虫敞锛岃瀵熺幆澧冨彉鍖栥€?,
-        "violent_flapping": "鍓х儓鎵戠繀锛屽彲鑳藉彈鎯婂悡锛屾鏌ュ懆鍥村共鎵版簮銆?,
-        "cage_collision": "鎾炵锛屽彲鑳藉簲婵€鎴栫┖闂翠笉瓒筹紝瑙傚療琛屼负鐘舵€併€?
+        "night_scream": "疑似夜惊，建议检查光线、噪声和笼布遮挡情况。",
+        "high_frequency_scream": "高频尖叫，可能应激或求关注，观察环境变化。",
+        "violent_flapping": "剧烈扑翅，可能受惊吓，检查周围干扰源。",
+        "cage_collision": "撞笼，可能应激或空间不足，观察行为状态。"
     }
-    return suggestions.get(event_type, "寤鸿瑙傚療楣﹂箟鐘舵€侊紝蹇呰鏃跺挩璇㈠吔鍖汇€?)
+    return suggestions.get(event_type, "建议观察鹦鹉状态，必要时咨询兽医。")

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -22,69 +22,69 @@
     </style>
 </head>
 <body class="gradient-bg">
-<!-- 鐧诲綍椤甸潰 -->
+<!-- 登录页面 -->
 <div id="login-page" class="container d-flex align-items-center justify-content-center">
     <div class="card p-4 shadow-lg" style="width: 100%; max-width: 400px;">
         <div class="card-body">
-            <h3 class="card-title text-center mb-4"><span class="parrot-icon">馃</span> ParrotCare AI</h3>
+            <h3 class="card-title text-center mb-4"><span class="parrot-icon">🦜</span> ParrotCare AI</h3>
             <form id="login-form">
-                <div class="mb-3"><label class="form-label">鎵嬫満鍙?/label><input type="tel" class="form-control" id="phone" placeholder="璇疯緭鍏ユ墜鏈哄彿"></div>
-                <div class="mb-3"><label class="form-label">瀵嗙爜</label><input type="password" class="form-control" id="password" placeholder="璇疯緭鍏ュ瘑鐮?></div>
-                <button type="submit" class="btn btn-primary w-100">鐧诲綍</button>
-                <p class="text-center mt-3"><a href="#" id="register-link">娌℃湁璐﹀彿锛熸敞鍐?/a><span class="mx-2">|</span><a href="#" id="forgot-password-link">蹇樿瀵嗙爜锛?/a></p>
+                <div class="mb-3"><label class="form-label">手机号</label><input type="tel" class="form-control" id="phone" placeholder="请输入手机号"></div>
+                <div class="mb-3"><label class="form-label">密码</label><input type="password" class="form-control" id="password" placeholder="请输入密码"></div>
+                <button type="submit" class="btn btn-primary w-100">登录</button>
+                <p class="text-center mt-3"><a href="#" id="register-link">没有账号？注册</a><span class="mx-2">|</span><a href="#" id="forgot-password-link">忘记密码？</a></p>
             </form>
         </div>
     </div>
 </div>
 
-<!-- 娉ㄥ唽椤甸潰 -->
+<!-- 注册页面 -->
 <div id="register-page" class="container d-flex align-items-center justify-content-center" style="display: none;">
     <div class="card p-4 shadow-lg" style="width: 100%; max-width: 400px;">
         <div class="card-body">
-            <h3 class="card-title text-center mb-4">娉ㄥ唽璐﹀彿</h3>
+            <h3 class="card-title text-center mb-4">注册账号</h3>
             <form id="register-form">
-                <div class="mb-3"><label class="form-label">鎵嬫満鍙?/label><input type="tel" class="form-control" id="reg-phone" placeholder="璇疯緭鍏ユ墜鏈哄彿"></div>
-                <div class="mb-3"><label class="form-label">瀵嗙爜</label><input type="password" class="form-control" id="reg-password" placeholder="璇疯緭鍏ュ瘑鐮?></div>
-                <div class="mb-3"><label class="form-label">鏄电О</label><input type="text" class="form-control" id="reg-nickname" placeholder="璇疯緭鍏ユ樀绉?></div>
-                <div class="mb-3"><label class="form-label">閭锛堝彲閫夛級</label><input type="email" class="form-control" id="reg-email" placeholder="璇疯緭鍏ラ偖绠?></div>
-                <button type="submit" class="btn btn-success w-100">娉ㄥ唽</button>
-                <p class="text-center mt-3"><a href="#" id="back-login-link">杩斿洖鐧诲綍</a></p>
+                <div class="mb-3"><label class="form-label">手机号</label><input type="tel" class="form-control" id="reg-phone" placeholder="请输入手机号"></div>
+                <div class="mb-3"><label class="form-label">密码</label><input type="password" class="form-control" id="reg-password" placeholder="请输入密码"></div>
+                <div class="mb-3"><label class="form-label">昵称</label><input type="text" class="form-control" id="reg-nickname" placeholder="请输入昵称"></div>
+                <div class="mb-3"><label class="form-label">邮箱（可选）</label><input type="email" class="form-control" id="reg-email" placeholder="请输入邮箱"></div>
+                <button type="submit" class="btn btn-success w-100">注册</button>
+                <p class="text-center mt-3"><a href="#" id="back-login-link">返回登录</a></p>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Sprint 1: 瀵嗙爜閲嶇疆椤甸潰 -->
+<!-- Sprint 1: 密码重置页面 -->
 <div id="reset-password-page" class="container d-flex align-items-center justify-content-center" style="display: none;">
     <div class="card p-4 shadow-lg" style="width: 100%; max-width: 400px;">
         <div class="card-body">
-            <h3 class="card-title text-center mb-4">閲嶇疆瀵嗙爜</h3>
+            <h3 class="card-title text-center mb-4">重置密码</h3>
             <div id="reset-request-form">
                 <form>
-                    <div class="mb-3"><label class="form-label">閭鍦板潃</label><input type="email" class="form-control" id="reset-email" placeholder="璇疯緭鍏ユ敞鍐岄偖绠?></div>
-                    <button type="button" class="btn btn-primary w-100" id="request-reset-btn">鍙戦€侀噸缃摼鎺?/button>
-                    <p class="text-center mt-3"><a href="#" id="back-login-from-reset">杩斿洖鐧诲綍</a></p>
+                    <div class="mb-3"><label class="form-label">邮箱地址</label><input type="email" class="form-control" id="reset-email" placeholder="请输入注册邮箱"></div>
+                    <button type="button" class="btn btn-primary w-100" id="request-reset-btn">发送重置链接</button>
+                    <p class="text-center mt-3"><a href="#" id="back-login-from-reset">返回登录</a></p>
                 </form>
             </div>
             <div id="reset-success-msg" style="display: none;">
-                <div class="alert alert-success">閲嶇疆閾炬帴宸插彂閫佸埌鎮ㄧ殑閭锛岃鏌ユ敹閭欢銆?/div>
-                <p class="text-center"><a href="#" id="back-login-from-success">杩斿洖鐧诲綍</a></p>
+                <div class="alert alert-success">重置链接已发送到您的邮箱，请查收邮件。</div>
+                <p class="text-center"><a href="#" id="back-login-from-success">返回登录</a></p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- 涓婚〉 -->
+<!-- 主页 -->
 <div id="home-page" class="container py-4" style="display: none;">
     <div class="row mb-3">
         <div class="col-12">
             <div class="card shadow">
                 <div class="card-body d-flex justify-content-between align-items-center">
-                    <h5><span class="parrot-icon" style="font-size:24px;">馃</span> ParrotCare AI</h5>
+                    <h5><span class="parrot-icon" style="font-size:24px;">🦜</span> ParrotCare AI</h5>
                     <div class="d-flex gap-3">
-                        <span class="nav-icon position-relative" id="notification-btn">馃敂<span class="notification-badge" id="notification-badge" style="display:none;">0</span></span>
-                        <span class="nav-icon" id="profile-btn">馃懁</span>
-                        <span class="nav-icon" id="logout-btn">馃毆</span>
+                        <span class="nav-icon position-relative" id="notification-btn">🔔<span class="notification-badge" id="notification-badge" style="display:none;">0</span></span>
+                        <span class="nav-icon" id="profile-btn">👤</span>
+                        <span class="nav-icon" id="logout-btn">🚪</span>
                     </div>
                 </div>
             </div>
@@ -94,101 +94,101 @@
         <div class="col-12 mb-4">
             <div class="card card-hover shadow">
                 <div class="card-body">
-                    <h5 class="card-title"><span class="parrot-icon">馃</span><span id="parrot-name">灏忕伆</span> - 浠婃棩鐘舵€?/h5>
+                    <h5 class="card-title"><span class="parrot-icon">🦜</span><span id="parrot-name">小灰</span> - 今日状态</h5>
                     <div class="row text-center">
-                        <div class="col-4"><div class="display-4 status-healthy" id="health-score">100</div><small class="text-muted">鍋ュ悍璇勫垎</small></div>
-                        <div class="col-4"><div class="display-4" id="chirp-count">0</div><small class="text-muted">楦ｅ彨娆℃暟</small></div>
-                        <div class="col-4"><div class="display-4" id="scream-count">0</div><small class="text-muted">寮傚父灏栧彨</small></div>
+                        <div class="col-4"><div class="display-4 status-healthy" id="health-score">100</div><small class="text-muted">健康评分</small></div>
+                        <div class="col-4"><div class="display-4" id="chirp-count">0</div><small class="text-muted">鸣叫次数</small></div>
+                        <div class="col-4"><div class="display-4" id="scream-count">0</div><small class="text-muted">异常尖叫</small></div>
                     </div>
-                    <p class="mt-3 text-center" id="status-summary">浠婃棩鏆傛棤鏁版嵁</p>
+                    <p class="mt-3 text-center" id="status-summary">今日暂无数据</p>
                 </div>
             </div>
         </div>
         <div class="col-12 mb-4" id="health-overview-card" style="display:none;">
             <div class="card card-hover shadow">
-                <div class="card-header"><h5>馃搳 鍋ュ悍妗ｆ鎬昏</h5></div>
+                <div class="card-header"><h5>📊 健康档案总览</h5></div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-6"><h6>7鏃ュ钩鍧囧仴搴疯瘎鍒?/h6><div class="display-6" id="avg-health-7days">100</div></div>
-                        <div class="col-md-6"><h6>30鏃ュ钩鍧囧仴搴疯瘎鍒?/h6><div class="display-6" id="avg-health-30days">100</div></div>
+                        <div class="col-md-6"><h6>7日平均健康评分</h6><div class="display-6" id="avg-health-7days">100</div></div>
+                        <div class="col-md-6"><h6>30日平均健康评分</h6><div class="display-6" id="avg-health-30days">100</div></div>
                     </div>
                     <div class="row mt-3">
-                        <div class="col-md-4"><small>鍋ュ悍瓒嬪娍</small><div id="health-trend">绋冲畾 鈫?/div></div>
-                        <div class="col-md-4"><small>7鏃ュ紓甯镐簨浠?/small><div id="abnormal-7days">0</div></div>
-                        <div class="col-md-4"><small>30鏃ュ紓甯镐簨浠?/small><div id="abnormal-30days">0</div></div>
+                        <div class="col-md-4"><small>健康趋势</small><div id="health-trend">稳定 →</div></div>
+                        <div class="col-md-4"><small>7日异常事件</small><div id="abnormal-7days">0</div></div>
+                        <div class="col-md-4"><small>30日异常事件</small><div id="abnormal-30days">0</div></div>
                     </div>
-                    <div class="mt-3"><h6>鍋ュ悍寤鸿</h6><ul id="health-recommendations" class="list-unstyled"><li>缁х画淇濇寔鑹ソ鐨勫吇鎶や範鎯?/li></ul></div>
+                    <div class="mt-3"><h6>健康建议</h6><ul id="health-recommendations" class="list-unstyled"><li>继续保持良好的养护习惯</li></ul></div>
                 </div>
             </div>
         </div>
         <div class="col-12 mb-4">
             <div class="card card-hover shadow">
-                <div class="card-header"><h5>楣﹂箟妗ｆ</h5></div>
+                <div class="card-header"><h5>鹦鹉档案</h5></div>
                 <div class="card-body">
                     <div id="parrots-list"></div>
-                    <button class="btn btn-outline-primary mt-3" id="add-parrot-btn">+ 娣诲姞楣﹂箟</button>
-                    <button class="btn btn-outline-secondary mt-3 ms-2" id="health-overview-btn">馃搳 鍋ュ悍鎬昏</button>
+                    <button class="btn btn-outline-primary mt-3" id="add-parrot-btn">+ 添加鹦鹉</button>
+                    <button class="btn btn-outline-secondary mt-3 ms-2" id="health-overview-btn">📊 健康总览</button>
                 </div>
             </div>
         </div>
         <div class="col-12 mb-4">
             <div class="card card-hover shadow">
-                <div class="card-header"><h5>寮傚父浜嬩欢</h5></div>
+                <div class="card-header"><h5>异常事件</h5></div>
                 <div class="card-body"><ul class="list-group" id="events-list"></ul></div>
             </div>
         </div>
-        <div class="col-12"><div class="d-grid gap-2"><button class="btn btn-primary btn-lg" id="record-btn">馃帳 寮€濮嬪綍闊?/button></div></div>
+        <div class="col-12"><div class="d-grid gap-2"><button class="btn btn-primary btn-lg" id="record-btn">🎤 开始录音</button></div></div>
     </div>
 </div>
 
-<!-- Sprint 1: 娑堟伅涓績闈㈡澘 -->
+<!-- Sprint 1: 消息中心面板 -->
 <div class="modal fade" id="notification-modal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">馃敂 娑堟伅涓績</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header"><h5 class="modal-title">🔔 消息中心</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <div class="d-flex justify-content-between mb-3">
-                    <div><button class="btn btn-sm btn-outline-primary" id="filter-unread">鏈娑堟伅</button><button class="btn btn-sm btn-outline-secondary" id="filter-all">鍏ㄩ儴娑堟伅</button></div>
-                    <button class="btn btn-sm btn-success" id="mark-all-read-btn">鍏ㄩ儴鏍囪宸茶</button>
+                    <div><button class="btn btn-sm btn-outline-primary" id="filter-unread">未读消息</button><button class="btn btn-sm btn-outline-secondary" id="filter-all">全部消息</button></div>
+                    <button class="btn btn-sm btn-success" id="mark-all-read-btn">全部标记已读</button>
                 </div>
                 <ul class="list-group" id="notification-list"></ul>
-                <div id="notification-empty" class="text-center text-muted py-4" style="display:none;">鏆傛棤娑堟伅</div>
+                <div id="notification-empty" class="text-center text-muted py-4" style="display:none;">暂无消息</div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Sprint 1: 涓汉淇℃伅缂栬緫闈㈡澘 -->
+<!-- Sprint 1: 个人信息编辑面板 -->
 <div class="modal fade" id="profile-modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">馃懁 涓汉淇℃伅</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header"><h5 class="modal-title">👤 个人信息</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <form id="profile-form">
-                    <div class="mb-3"><label class="form-label">鏄电О</label><input type="text" class="form-control" id="profile-nickname"></div>
-                    <div class="mb-3"><label class="form-label">鎵嬫満鍙?/label><input type="tel" class="form-control" id="profile-phone" readonly></div>
-                    <div class="mb-3"><label class="form-label">閭</label><input type="email" class="form-control" id="profile-email"></div>
-                    <div class="mb-3"><label class="form-label">璁㈤槄鐘舵€?/label><input type="text" class="form-control" id="profile-subscription" readonly></div>
-                    <button type="button" class="btn btn-primary w-100" id="save-profile-btn">淇濆瓨淇敼</button>
+                    <div class="mb-3"><label class="form-label">昵称</label><input type="text" class="form-control" id="profile-nickname"></div>
+                    <div class="mb-3"><label class="form-label">手机号</label><input type="tel" class="form-control" id="profile-phone" readonly></div>
+                    <div class="mb-3"><label class="form-label">邮箱</label><input type="email" class="form-control" id="profile-email"></div>
+                    <div class="mb-3"><label class="form-label">订阅状态</label><input type="text" class="form-control" id="profile-subscription" readonly></div>
+                    <button type="button" class="btn btn-primary w-100" id="save-profile-btn">保存修改</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<!-- 娣诲姞楣﹂箟寮圭獥 -->
+<!-- 添加鹦鹉弹窗 -->
 <div class="modal fade" id="add-parrot-modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">娣诲姞楣﹂箟</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header"><h5 class="modal-title">添加鹦鹉</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <form id="add-parrot-form">
-                    <div class="mb-3"><label class="form-label">楣﹂箟鍚嶅瓧</label><input type="text" class="form-control" id="parrot-name-input" placeholder="渚嬪锛氬皬鐏?></div>
-                    <div class="mb-3"><label class="form-label">鍝佺</label><select class="form-select" id="parrot-species"><option value="African Grey">闈炴床鐏伴功楣?/option><option value="Cockatiel">鐜勫嚖楣﹂箟</option><option value="Budgerigar">铏庣毊楣﹂箟</option><option value="Macaw">閲戝垰楣﹂箟</option><option value="Other">鍏朵粬</option></select></div>
-                    <div class="mb-3"><label class="form-label">骞撮緞</label><input type="number" class="form-control" id="parrot-age" placeholder="渚嬪锛?"></div>
+                    <div class="mb-3"><label class="form-label">鹦鹉名字</label><input type="text" class="form-control" id="parrot-name-input" placeholder="例如：小灰"></div>
+                    <div class="mb-3"><label class="form-label">品种</label><select class="form-select" id="parrot-species"><option value="African Grey">非洲灰鹦鹉</option><option value="Cockatiel">玄凤鹦鹉</option><option value="Budgerigar">虎皮鹦鹉</option><option value="Macaw">金刚鹦鹉</option><option value="Other">其他</option></select></div>
+                    <div class="mb-3"><label class="form-label">年龄</label><input type="number" class="form-control" id="parrot-age" placeholder="例如：3"></div>
                 </form>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">鍙栨秷</button><button type="button" class="btn btn-primary" id="save-parrot-btn">淇濆瓨</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button><button type="button" class="btn btn-primary" id="save-parrot-btn">保存</button></div>
         </div>
     </div>
 </div>

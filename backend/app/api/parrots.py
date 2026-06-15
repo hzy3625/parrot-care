@@ -1,4 +1,4 @@
-锘块功楣?API 璺敱 - Sprint 1 澧炲己鐗?
+﻿鹦鹉 API 路由 - Sprint 1 增强版
 """
 
 from fastapi import APIRouter, HTTPException, Depends
@@ -80,7 +80,7 @@ async def get_today_summary(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    # 楠岃瘉楣﹂箟褰掑睘
+    # 验证鹦鹉归属
     result = await db.execute(
         select(Parrot).where(
             Parrot.parrot_id == parrot_id,
@@ -89,9 +89,9 @@ async def get_today_summary(
     )
     parrot = result.scalar_one_or_none()
     if not parrot:
-        raise HTTPException(status_code=404, detail="楣﹂箟涓嶅瓨鍦?)
+        raise HTTPException(status_code=404, detail="鹦鹉不存在")
     
-    # 鑾峰彇浠婃棩缁熻
+    # 获取今日统计
     today = date.today()
     result = await db.execute(
         select(BehaviorDailyStat).where(
@@ -104,24 +104,24 @@ async def get_today_summary(
     if not stat:
         return ParrotSummary(
             health_score=100,
-            status="姝ｅ父",
+            status="正常",
             chirp_count=0,
             scream_count=0,
             night_activity_count=0,
             abnormal_event_count=0,
-            summary="浠婃棩鏆傛棤鏁版嵁"
+            summary="今日暂无数据"
         )
     
-    # 璁＄畻鐘舵€?
-    status = "姝ｅ父"
+    # 计算状态
+    status = "正常"
     if stat.abnormal_event_count > 0:
-        status = "杞诲害寮傚父" if stat.abnormal_event_count < 3 else "寮傚父"
+        status = "轻度异常" if stat.abnormal_event_count < 3 else "异常"
     if stat.health_score < 70:
-        status = "鍋ュ悍椋庨櫓"
+        status = "健康风险"
     
-    summary = f"浠婃棩楦ｅ彨{stat.chirp_count}娆★紝灏栧彨{stat.scream_count}娆?
+    summary = f"今日鸣叫{stat.chirp_count}次，尖叫{stat.scream_count}次"
     if stat.night_activity_count > 0:
-        summary += f"锛屽闂村紓甯告椿鍔▄stat.night_activity_count}娆?
+        summary += f"，夜间异常活动{stat.night_activity_count}次"
     
     return ParrotSummary(
         health_score=stat.health_score,
@@ -133,15 +133,15 @@ async def get_today_summary(
         summary=summary
     )
 
-# Sprint 1: 鍋ュ悍妗ｆ鎬昏
+# Sprint 1: 健康档案总览
 @router.get("/{parrot_id}/health-overview", response_model=HealthOverview)
 async def get_health_overview(
     parrot_id: str,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """鑾峰彇楣﹂箟鍋ュ悍妗ｆ鎬昏"""
-    # 楠岃瘉楣﹂箟褰掑睘
+    """获取鹦鹉健康档案总览"""
+    # 验证鹦鹉归属
     result = await db.execute(
         select(Parrot).where(
             Parrot.parrot_id == parrot_id,
@@ -150,14 +150,14 @@ async def get_health_overview(
     )
     parrot = result.scalar_one_or_none()
     if not parrot:
-        raise HTTPException(status_code=404, detail="楣﹂箟涓嶅瓨鍦?)
+        raise HTTPException(status_code=404, detail="鹦鹉不存在")
     
-    # 鑾峰彇鏈€杩戠粺璁℃暟鎹?
+    # 获取最近统计数据
     today = date.today()
     seven_days_ago = today - timedelta(days=7)
     thirty_days_ago = today - timedelta(days=30)
     
-    # 7澶╃粺璁?
+    # 7天统计
     result = await db.execute(
         select(BehaviorDailyStat).where(
             and_(
@@ -168,7 +168,7 @@ async def get_health_overview(
     )
     stats_7days = result.scalars().all()
     
-    # 30澶╃粺璁?
+    # 30天统计
     result = await db.execute(
         select(BehaviorDailyStat).where(
             and_(
@@ -179,7 +179,7 @@ async def get_health_overview(
     )
     stats_30days = result.scalars().all()
     
-    # 璁＄畻骞冲潎鍊?
+    # 计算平均值
     def avg_health(stats):
         if not stats:
             return 100.0
@@ -193,10 +193,10 @@ async def get_health_overview(
     abnormal_7days = count_abnormal(stats_7days)
     abnormal_30days = count_abnormal(stats_30days)
     
-    # 褰撳墠鍋ュ悍璇勫垎
+    # 当前健康评分
     current_score = stats_7days[0].health_score if stats_7days else 100
     
-    # 鍋ュ悍瓒嬪娍
+    # 健康趋势
     if len(stats_7days) >= 3:
         recent_avg = sum(s.health_score for s in stats_7days[:3]) / 3
         earlier_avg = sum(s.health_score for s in stats_7days[3:7]) / max(1, len(stats_7days[3:7]))
@@ -209,28 +209,28 @@ async def get_health_overview(
     else:
         trend = "stable"
     
-    # 鍋ュ悍鐘舵€?
+    # 健康状态
     if current_score >= 80:
-        health_status = "鍋ュ悍"
+        health_status = "健康"
     elif current_score >= 60:
-        health_status = "杞诲害寮傚父"
+        health_status = "轻度异常"
     elif current_score >= 40:
-        health_status = "涓害寮傚父"
+        health_status = "中度异常"
     else:
-        health_status = "鍋ュ悍椋庨櫓"
+        health_status = "健康风险"
     
-    # 鐢熸垚寤鸿
+    # 生成建议
     recommendations = []
     if abnormal_7days > 5:
-        recommendations.append("杩戞湡寮傚父浜嬩欢杈冨锛屽缓璁鏌ラ功楣夌敓娲荤幆澧?)
+        recommendations.append("近期异常事件较多，建议检查鹦鹉生活环境")
     if parrot.has_plucking_history:
-        recommendations.append("鏈夋嫈缇藉巻鍙诧紝寤鸿瀹氭湡妫€鏌ョ窘姣涚姸鎬?)
+        recommendations.append("有拔羽历史，建议定期检查羽毛状态")
     if parrot.has_night_fright_history:
-        recommendations.append("鏈夊鎯婂巻鍙诧紝寤鸿澶滈棿淇濇寔瀹夐潤鐜")
+        recommendations.append("有夜惊历史，建议夜间保持安静环境")
     if current_score < 70:
-        recommendations.append("鍋ュ悍璇勫垎鍋忎綆锛屽缓璁挩璇㈠吔鍖?)
+        recommendations.append("健康评分偏低，建议咨询兽医")
     if not recommendations:
-        recommendations.append("缁х画淇濇寔鑹ソ鐨勫吇鎶や範鎯?)
+        recommendations.append("继续保持良好的养护习惯")
     
     last_check = stats_7days[0].stat_date if stats_7days else datetime.utcnow()
     
@@ -249,13 +249,13 @@ async def get_health_overview(
         recommendations=recommendations
     )
 
-# Sprint 1: 鍏ㄩ功楣夊仴搴锋€昏
+# Sprint 1: 全鹦鹉健康总览
 @router.get("/health-overview", response_model=List[HealthOverview])
 async def get_all_health_overview(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """鑾峰彇鎵€鏈夐功楣夊仴搴锋。妗堟€昏"""
+    """获取所有鹦鹉健康档案总览"""
     result = await db.execute(
         select(Parrot).where(Parrot.user_id == current_user.user_id)
     )
@@ -263,7 +263,7 @@ async def get_all_health_overview(
     
     overviews = []
     for parrot in parrots:
-        # 閫掑綊璋冪敤鍗曚釜楣﹂箟鐨勫仴搴锋€昏
+        # 递归调用单个鹦鹉的健康总览
         overview = await get_health_overview(parrot.parrot_id, current_user, db)
         overviews.append(overview)
     

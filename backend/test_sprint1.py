@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Sprint 1 鑷姩鍖栨祴璇?- ParrotCare API
+Sprint 1 自动化测试 - ParrotCare API
 pytest + httpx + pytest-asyncio
 """
 
@@ -14,13 +14,13 @@ from app.models.database import User, PasswordResetToken, Notification, Parrot, 
 from app.api.users import hash_password
 
 
-# ==================== 鐢ㄦ埛璁よ瘉娴嬭瘯 ====================
+# ==================== 用户认证测试 ====================
 
 @pytest.mark.asyncio
 async def test_register_new_user(client):
     response = await client.post(
         "/api/users/register",
-        json={"phone": "13900139000", "password": "NewPass123", "nickname": "鏂扮敤鎴?}
+        json={"phone": "13900139000", "password": "NewPass123", "nickname": "新用户"}
     )
     assert response.status_code == 200
     data = response.json()
@@ -35,7 +35,7 @@ async def test_register_duplicate_phone(client, test_user):
         json={"phone": "13800138000", "password": "AnotherPass123"}
     )
     assert response.status_code == 400
-    assert "宸叉敞鍐? in response.json()["detail"]
+    assert "已注册" in response.json()["detail"]
 
 
 @pytest.mark.asyncio
@@ -56,10 +56,10 @@ async def test_login_wrong_password(client, test_user):
         json={"phone": "13800138000", "password": "WrongPassword123"}
     )
     assert response.status_code == 401
-    assert "閿欒" in response.json()["detail"]
+    assert "错误" in response.json()["detail"]
 
 
-# ==================== 瀵嗙爜閲嶇疆娴嬭瘯 ====================
+# ==================== 密码重置测试 ====================
 
 @pytest.mark.asyncio
 async def test_request_password_reset(client, test_user, db_session):
@@ -84,7 +84,7 @@ async def test_password_reset_frequency_limit(client, test_user, db_session):
         json={"email": "test@example.com"}
     )
     assert response.status_code == 429
-    assert "棰戠箒" in response.json()["detail"]
+    assert "频繁" in response.json()["detail"]
 
 
 @pytest.mark.asyncio
@@ -105,7 +105,7 @@ async def test_confirm_password_reset(client, test_user, db_session):
         json={"token": reset_token, "new_password": "NewSecurePass123"}
     )
     assert response.status_code == 200
-    assert "宸查噸缃? in response.json()["message"]
+    assert "已重置" in response.json()["message"]
 
 
 @pytest.mark.asyncio
@@ -126,7 +126,7 @@ async def test_confirm_expired_token(client, test_user, db_session):
         json={"token": expired_token, "new_password": "AnotherPass123"}
     )
     assert response.status_code == 400
-    assert "杩囨湡" in response.json()["detail"]
+    assert "过期" in response.json()["detail"]
 
 
 @pytest.mark.asyncio
@@ -155,7 +155,7 @@ async def test_password_strength_validation(client, test_user, db_session):
     assert response2.status_code == 400
 
 
-# ==================== 涓汉淇℃伅娴嬭瘯 ====================
+# ==================== 个人信息测试 ====================
 
 @pytest.mark.asyncio
 async def test_get_profile(auth_client):
@@ -170,11 +170,11 @@ async def test_get_profile(auth_client):
 async def test_update_profile(auth_client):
     response = await auth_client.put(
         "/api/users/profile",
-        json={"nickname": "鏇存柊鏄电О", "email": "updated@example.com"}
+        json={"nickname": "更新昵称", "email": "updated@example.com"}
     )
     assert response.status_code == 200
     data = response.json()
-    assert data["nickname"] == "鏇存柊鏄电О"
+    assert data["nickname"] == "更新昵称"
     assert data["email"] == "updated@example.com"
 
 
@@ -194,7 +194,7 @@ async def test_update_duplicate_email(auth_client, db_session):
         json={"email": "other@example.com"}
     )
     assert response.status_code == 400
-    assert "宸茶浣跨敤" in response.json()["detail"]
+    assert "已被使用" in response.json()["detail"]
 
 
 @pytest.mark.asyncio
@@ -203,7 +203,7 @@ async def test_change_password(auth_client):
         "/api/users/me/change-password?old_password=TestPass123&new_password=NewPass456"
     )
     assert response.status_code == 200
-    assert "宸蹭慨鏀? in response.json()["message"]
+    assert "已修改" in response.json()["message"]
 
 
 @pytest.mark.asyncio
@@ -212,10 +212,10 @@ async def test_change_password_wrong_old(auth_client):
         "/api/users/me/change-password?old_password=WrongOldPass&new_password=NewPass789"
     )
     assert response.status_code == 400
-    assert "涓嶆纭? in response.json()["detail"]
+    assert "不正确" in response.json()["detail"]
 
 
-# ==================== 娑堟伅涓績娴嬭瘯 ====================
+# ==================== 消息中心测试 ====================
 
 @pytest.mark.asyncio
 async def test_create_notification(auth_client):
@@ -223,13 +223,13 @@ async def test_create_notification(auth_client):
         "/api/notifications",
         json={
             "notification_type": "system",
-            "title": "娴嬭瘯娑堟伅",
-            "content": "杩欐槸涓€鏉℃祴璇曢€氱煡"
+            "title": "测试消息",
+            "content": "这是一条测试通知"
         }
     )
     assert response.status_code == 200
     data = response.json()
-    assert data["title"] == "娴嬭瘯娑堟伅"
+    assert data["title"] == "测试消息"
     assert data["is_read"] == False
 
 
@@ -240,8 +240,8 @@ async def test_list_notifications(auth_client):
             "/api/notifications",
             json={
                 "notification_type": "system",
-                "title": f"娑堟伅{i}",
-                "content": f"鍐呭{i}"
+                "title": f"消息{i}",
+                "content": f"内容{i}"
             }
         )
     
@@ -256,7 +256,7 @@ async def test_list_notifications(auth_client):
 async def test_unread_count(auth_client):
     await auth_client.post(
         "/api/notifications",
-        json={"notification_type": "system", "title": "鏈", "content": "test"}
+        json={"notification_type": "system", "title": "未读", "content": "test"}
     )
     
     response = await auth_client.get("/api/notifications/unread-count")
@@ -268,7 +268,7 @@ async def test_unread_count(auth_client):
 async def test_mark_notification_read(auth_client):
     create_resp = await auth_client.post(
         "/api/notifications",
-        json={"notification_type": "system", "title": "寰呮爣璁?, "content": "test"}
+        json={"notification_type": "system", "title": "待标记", "content": "test"}
     )
     notification_id = create_resp.json()["notification_id"]
     
@@ -283,7 +283,7 @@ async def test_mark_all_read(auth_client):
     for i in range(3):
         resp = await auth_client.post(
             "/api/notifications",
-            json={"notification_type": "system", "title": f"鎵归噺{i}", "content": "test"}
+            json={"notification_type": "system", "title": f"批量{i}", "content": "test"}
         )
         ids.append(resp.json()["notification_id"])
     
@@ -295,15 +295,15 @@ async def test_mark_all_read(auth_client):
     assert response.json()["updated_count"] == 3
 
 
-# ==================== 鍋ュ悍妗ｆ娴嬭瘯 ====================
+# ==================== 健康档案测试 ====================
 
 @pytest.mark.asyncio
 async def test_health_overview_single(auth_client, db_session, test_user):
     parrot = Parrot(
         parrot_id=generate_id(),
         user_id=test_user.user_id,
-        name="灏忕豢",
-        species="缁跨繀楣﹂箟"
+        name="小绿",
+        species="绿翅鹦鹉"
     )
     db_session.add(parrot)
     await db_session.commit()
@@ -325,7 +325,7 @@ async def test_health_overview_single(auth_client, db_session, test_user):
     response = await auth_client.get(f"/api/parrots/{parrot.parrot_id}/health-overview")
     assert response.status_code == 200
     data = response.json()
-    assert data["parrot_name"] == "灏忕豢"
+    assert data["parrot_name"] == "小绿"
     assert data["current_health_score"] == 85
 
 
@@ -335,8 +335,8 @@ async def test_health_overview_all(auth_client, db_session, test_user):
         parrot = Parrot(
             parrot_id=generate_id(),
             user_id=test_user.user_id,
-            name=f"楣﹂箟{i}",
-            species="铏庣毊楣﹂箟"
+            name=f"鹦鹉{i}",
+            species="虎皮鹦鹉"
         )
         db_session.add(parrot)
         await db_session.commit()

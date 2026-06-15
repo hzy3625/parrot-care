@@ -1,5 +1,5 @@
 """
-鍚姩鑴氭湰
+启动脚本
 """
 
 import asyncio
@@ -8,9 +8,9 @@ from main import app
 import uvicorn
 
 async def startup():
-    print("鍒濆鍖栨暟鎹簱...")
+    print("初始化数据库...")
     await init_db()
-    print("鏁版嵁搴撳垵濮嬪寲瀹屾垚")
+    print("数据库初始化完成")
 
 if __name__ == "__main__":
     asyncio.run(startup())

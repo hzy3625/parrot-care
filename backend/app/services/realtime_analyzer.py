@@ -1,6 +1,6 @@
 """
-AI闊抽瀹炴椂鍒嗘瀽鏈嶅姟 - REQ-PARROT-003
-瀹炵幇瀹炴椂闊抽娴佸鐞嗐€佸垎绫汇€佸紓甯告娴?
+AI音频实时分析服务 - REQ-PARROT-003
+实现实时音频流处理、分类、异常检测
 """
 
 import asyncio
@@ -10,21 +10,21 @@ from typing import Optional, Dict, List
 from dataclasses import dataclass
 import json
 
-# 闊抽鍒嗙被绫诲瀷
+# 音频分类类型
 AUDIO_TYPES = {
-    'chirp': {'name': '楦熼福', 'risk': 0},
-    'scream': {'name': '灏栧彨', 'risk': 1},
-    'normal': {'name': '姝ｅ父', 'risk': 0},
-    'night_activity': {'name': '澶滈棿寮傚父', 'risk': 2},
+    'chirp': {'name': '鸟鸣', 'risk': 0},
+    'scream': {'name': '尖叫', 'risk': 1},
+    'normal': {'name': '正常', 'risk': 0},
+    'night_activity': {'name': '夜间异常', 'risk': 2},
 }
 
-# 澶滈棿鏃堕棿鑼冨洿 (22:00 - 06:00)
+# 夜间时间范围 (22:00 - 06:00)
 NIGHT_START = time(22, 0)
 NIGHT_END = time(6, 0)
 
 @dataclass
 class AudioAnalysisResult:
-    """闊抽鍒嗘瀽缁撴灉"""
+    """音频分析结果"""
     audio_type: str
     classification: str
     confidence: float
@@ -35,38 +35,38 @@ class AudioAnalysisResult:
     event_id: Optional[str] = None
 
 class AudioAnalyzer:
-    """瀹炴椂闊抽鍒嗘瀽鍣?""
+    """实时音频分析器"""
     
     def __init__(self):
         self.model_loaded = False
         self.analysis_history: List[AudioAnalysisResult] = []
     
     async def load_model(self):
-        """鍔犺浇AI妯″瀷"""
-        # MVP鐗堟湰浣跨敤绠€鍖栨ā鍨?
+        """加载AI模型"""
+        # MVP版本使用简化模型
         self.model_loaded = True
-        print("[AudioAnalyzer] 妯″瀷宸插姞杞?)
+        print("[AudioAnalyzer] 模型已加载")
     
     def is_night_time(self) -> bool:
-        """妫€鏌ュ綋鍓嶆槸鍚︽槸澶滈棿"""
+        """检查当前是否是夜间"""
         now = datetime.now().time()
         if now >= NIGHT_START or now <= NIGHT_END:
             return True
         return False
     
     async def analyze_audio_chunk(self, audio_data: bytes, parrot_id: str) -> AudioAnalysisResult:
-        """鍒嗘瀽闊抽鐗囨"""
+        """分析音频片段"""
         if not self.model_loaded:
             await self.load_model()
         
-        # 绠€鍖栧垎鏋愶細鍩轰簬闊抽鐗瑰緛妯℃嫙鍒嗙被
-        # 瀹為檯搴旂敤涓簲浣跨敤鐪熷疄AI妯″瀷
+        # 简化分析：基于音频特征模拟分类
+        # 实际应用中应使用真实AI模型
         
-        # 妯℃嫙鍒嗘瀽缁撴灉
+        # 模拟分析结果
         audio_type = self._simulate_classification(audio_data)
         is_night = self.is_night_time()
         
-        # 澶滈棿娲诲姩鍒ゆ柇
+        # 夜间活动判断
         if is_night and audio_type != 'normal':
             audio_type = 'night_activity'
         
@@ -76,7 +76,7 @@ class AudioAnalyzer:
         result = AudioAnalysisResult(
             audio_type=audio_type,
             classification=classification,
-            confidence=0.85,  # 妯℃嫙缃俊搴?
+            confidence=0.85,  # 模拟置信度
             is_night=is_night,
             risk_level=risk_level,
             timestamp=datetime.now(),
@@ -85,15 +85,15 @@ class AudioAnalyzer:
         
         self.analysis_history.append(result)
         
-        # 楂橀闄╀簨浠堕渶瑕佽褰?
+        # 高风险事件需要记录
         if risk_level >= 1:
             result.event_id = await self._record_event(result)
         
         return result
     
     def _simulate_classification(self, audio_data: bytes) -> str:
-        """妯℃嫙闊抽鍒嗙被"""
-        # MVP鐗堟湰锛氱畝鍗曟ā鎷?
+        """模拟音频分类"""
+        # MVP版本：简单模拟
         length = len(audio_data)
         
         if length < 1000:
@@ -104,7 +104,7 @@ class AudioAnalyzer:
             return 'normal'
     
     async def _record_event(self, result: AudioAnalysisResult) -> str:
-        """璁板綍寮傚父浜嬩欢"""
+        """记录异常事件"""
         event_id = f"evt_{datetime.now().strftime('%Y%m%d%H%M%S')}"
         
         event_data = {
@@ -112,23 +112,23 @@ class AudioAnalyzer:
             'parrot_id': result.parrot_id,
             'event_type': result.classification,
             'event_time': result.timestamp.isoformat(),
-            'description': f"{result.classification}锛岀疆淇″害{result.confidence:.0%}",
+            'description': f"{result.classification}，置信度{result.confidence:.0%}",
             'is_night': result.is_night,
             'risk_level': result.risk_level
         }
         
-        # 淇濆瓨浜嬩欢鍒版枃浠讹紙瀹為檯搴旂敤涓簲淇濆瓨鍒版暟鎹簱锛?
+        # 保存事件到文件（实际应用中应保存到数据库）
         events_file = 'D:/autoclawworkspace/parrot-care/events.json'
         try:
             with open(events_file, 'a', encoding='utf-8') as f:
                 f.write(json.dumps(event_data) + '\n')
         except Exception as e:
-            print(f"淇濆瓨浜嬩欢澶辫触: {e}")
+            print(f"保存事件失败: {e}")
         
         return event_id
     
     async def get_parrot_stats(self, parrot_id: str) -> Dict:
-        """鑾峰彇楣﹂箟缁熻鏁版嵁"""
+        """获取鹦鹉统计数据"""
         parrot_results = [r for r in self.analysis_history if r.parrot_id == parrot_id]
         
         chirp_count = sum(1 for r in parrot_results if r.audio_type == 'chirp')
@@ -136,7 +136,7 @@ class AudioAnalyzer:
         night_count = sum(1 for r in parrot_results if r.audio_type == 'night_activity')
         abnormal_count = sum(1 for r in parrot_results if r.risk_level >= 1)
         
-        # 鍋ュ悍璇勫垎璁＄畻
+        # 健康评分计算
         health_score = 100 - (scream_count * 5) - (night_count * 10) - (abnormal_count * 3)
         health_score = max(0, min(100, health_score))
         
@@ -151,32 +151,32 @@ class AudioAnalyzer:
         }
     
     async def clear_history(self, parrot_id: str):
-        """娓呴櫎鍘嗗彶鏁版嵁"""
+        """清除历史数据"""
         self.analysis_history = [r for r in self.analysis_history if r.parrot_id != parrot_id]
 
-# WebSocket 瀹炴椂鎺ㄩ€佹湇鍔?
+# WebSocket 实时推送服务
 class RealtimeNotifier:
-    """瀹炴椂閫氱煡鏈嶅姟"""
+    """实时通知服务"""
     
     def __init__(self):
         self.connections: Dict[str, List] = {}  # parrot_id -> connections
     
     async def connect(self, parrot_id: str, websocket):
-        """寤虹珛杩炴帴"""
+        """建立连接"""
         if parrot_id not in self.connections:
             self.connections[parrot_id] = []
         self.connections[parrot_id].append(websocket)
-        print(f"[Notifier] 鏂拌繛鎺? {parrot_id}")
+        print(f"[Notifier] 新连接: {parrot_id}")
     
     async def disconnect(self, parrot_id: str, websocket):
-        """鏂紑杩炴帴"""
+        """断开连接"""
         if parrot_id in self.connections:
             self.connections[parrot_id].remove(websocket)
             if not self.connections[parrot_id]:
                 del self.connections[parrot_id]
     
     async def notify(self, parrot_id: str, result: AudioAnalysisResult):
-        """鎺ㄩ€佸垎鏋愮粨鏋?""
+        """推送分析结果"""
         if parrot_id not in self.connections:
             return
         
@@ -197,35 +197,35 @@ class RealtimeNotifier:
             try:
                 await ws.send(json.dumps(message))
             except Exception as e:
-                print(f"鎺ㄩ€佸け璐? {e}")
+                print(f"推送失败: {e}")
 
-# 娴嬭瘯鍑芥暟
+# 测试函数
 async def test_analyzer():
-    """娴嬭瘯鍒嗘瀽鍣?""
+    """测试分析器"""
     analyzer = AudioAnalyzer()
     await analyzer.load_model()
     
-    # 妯℃嫙闊抽鏁版嵁
+    # 模拟音频数据
     test_audio = bytes([0] * 2000)
     parrot_id = "test_parrot_001"
     
-    # 鎵ц鍒嗘瀽
+    # 执行分析
     result = await analyzer.analyze_audio_chunk(test_audio, parrot_id)
     
-    print(f"鍒嗘瀽缁撴灉:")
-    print(f"  绫诲瀷: {result.classification}")
-    print(f"  缃俊搴? {result.confidence:.0%}")
-    print(f"  澶滈棿: {result.is_night}")
-    print(f"  椋庨櫓: {result.risk_level}")
+    print(f"分析结果:")
+    print(f"  类型: {result.classification}")
+    print(f"  置信度: {result.confidence:.0%}")
+    print(f"  夜间: {result.is_night}")
+    print(f"  风险: {result.risk_level}")
     
     if result.event_id:
-        print(f"  浜嬩欢ID: {result.event_id}")
+        print(f"  事件ID: {result.event_id}")
     
-    # 鑾峰彇缁熻
+    # 获取统计
     stats = await analyzer.get_parrot_stats(parrot_id)
-    print(f"\n缁熻:")
-    print(f"  鍋ュ悍璇勫垎: {stats['health_score']}")
-    print(f"  楦ｅ彨娆℃暟: {stats['chirp_count']}")
+    print(f"\n统计:")
+    print(f"  健康评分: {stats['health_score']}")
+    print(f"  鸣叫次数: {stats['chirp_count']}")
 
 if __name__ == "__main__":
     asyncio.run(test_analyzer())
