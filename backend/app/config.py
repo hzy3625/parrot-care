@@ -1,12 +1,12 @@
 """
-应用配置 - MVP 测试版本
+搴旂敤閰嶇疆 - MVP 娴嬭瘯鐗堟湰
 """
 
 import os
 from pathlib import Path
 
 class Settings:
-    # 数据库 - 使用 SQLite 进行 MVP 测试
+    # 鏁版嵁搴?- 浣跨敤 SQLite 杩涜 MVP 娴嬭瘯
     DATABASE_URL: str = f"sqlite+aiosqlite:///{Path(__file__).parent.parent}/parrotcare.db"
     
     # JWT

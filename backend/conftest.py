@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-测试配置 - Sprint 1 自动化测试
-提供 fixtures: async client, db session, test user
+娴嬭瘯閰嶇疆 - Sprint 1 鑷姩鍖栨祴璇?
+鎻愪緵 fixtures: async client, db session, test user
 """
 
 import pytest
@@ -16,7 +16,7 @@ from app.models.database import Base, User, generate_id
 from app.api.users import hash_password, create_token
 from app.db import get_db
 
-# 内存数据库引擎
+# 鍐呭瓨鏁版嵁搴撳紩鎿?
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 test_engine = create_async_engine(
@@ -59,7 +59,7 @@ async def test_user(db_session):
         user_id=generate_id(),
         phone="13800138000",
         password_hash=hash_password("TestPass123"),
-        nickname="测试用户",
+        nickname="娴嬭瘯鐢ㄦ埛",
         email="test@example.com"
     )
     db_session.add(user)

@@ -1,4 +1,4 @@
-﻿站内消息 API 路由 - Sprint 1
+锘跨珯鍐呮秷鎭?API 璺敱 - Sprint 1
 """
 
 from fastapi import APIRouter, HTTPException, Depends, Query
@@ -23,7 +23,7 @@ async def create_notification(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """创建站内消息"""
+    """鍒涘缓绔欏唴娑堟伅"""
     notification = Notification(
         notification_id=generate_id(),
         user_id=current_user.user_id,
@@ -58,15 +58,15 @@ async def list_notifications(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """获取消息列表（分页）"""
-    # 构建查询条件
+    """鑾峰彇娑堟伅鍒楄〃锛堝垎椤碉級"""
+    # 鏋勫缓鏌ヨ鏉′欢
     conditions = [Notification.user_id == current_user.user_id]
     if unread_only:
         conditions.append(Notification.is_read == False)
     if notification_type:
         conditions.append(Notification.notification_type == notification_type)
     
-    # 统计总数和未读数
+    # 缁熻鎬绘暟鍜屾湭璇绘暟
     total_query = select(func.count()).where(and_(*conditions))
     total_result = await db.execute(total_query)
     total = total_result.scalar()
@@ -77,7 +77,7 @@ async def list_notifications(
     unread_result = await db.execute(unread_query)
     unread_count = unread_result.scalar()
     
-    # 分页查询
+    # 鍒嗛〉鏌ヨ
     offset = (page - 1) * page_size
     query = select(Notification).where(and_(*conditions)).order_by(desc(Notification.created_at)).offset(offset).limit(page_size)
     result = await db.execute(query)
@@ -108,7 +108,7 @@ async def get_unread_count(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """获取未读消息数量"""
+    """鑾峰彇鏈娑堟伅鏁伴噺"""
     query = select(func.count()).where(
         and_(Notification.user_id == current_user.user_id, Notification.is_read == False)
     )
@@ -122,9 +122,9 @@ async def mark_notifications_read(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """批量标记消息已读"""
+    """鎵归噺鏍囪娑堟伅宸茶"""
     if not mark_data.notification_ids:
-        raise HTTPException(status_code=400, detail="消息ID列表不能为空")
+        raise HTTPException(status_code=400, detail="娑堟伅ID鍒楄〃涓嶈兘涓虹┖")
     
     now = datetime.utcnow()
     query = select(Notification).where(
@@ -144,7 +144,7 @@ async def mark_notifications_read(
             updated_count += 1
     
     await db.commit()
-    return {"message": "标记成功", "updated_count": updated_count}
+    return {"message": "鏍囪鎴愬姛", "updated_count": updated_count}
 
 @router.patch("/{notification_id}/read", response_model=NotificationResponse)
 async def mark_single_read(
@@ -152,7 +152,7 @@ async def mark_single_read(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """标记单个消息已读"""
+    """鏍囪鍗曚釜娑堟伅宸茶"""
     result = await db.execute(
         select(Notification).where(
             Notification.notification_id == notification_id,
@@ -162,7 +162,7 @@ async def mark_single_read(
     notification = result.scalar_one_or_none()
     
     if not notification:
-        raise HTTPException(status_code=404, detail="消息不存在")
+        raise HTTPException(status_code=404, detail="娑堟伅涓嶅瓨鍦?)
     
     if not notification.is_read:
         notification.is_read = True
@@ -188,7 +188,7 @@ async def delete_notification(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """删除消息"""
+    """鍒犻櫎娑堟伅"""
     result = await db.execute(
         select(Notification).where(
             Notification.notification_id == notification_id,
@@ -198,8 +198,8 @@ async def delete_notification(
     notification = result.scalar_one_or_none()
     
     if not notification:
-        raise HTTPException(status_code=404, detail="消息不存在")
+        raise HTTPException(status_code=404, detail="娑堟伅涓嶅瓨鍦?)
     
     await db.delete(notification)
     await db.commit()
-    return {"message": "删除成功", "notification_id": notification_id}
+    return {"message": "鍒犻櫎鎴愬姛", "notification_id": notification_id}

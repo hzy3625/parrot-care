@@ -1,170 +1,170 @@
-# ParrotCare V0.4 Sprint 1 自动化测试方案
+# ParrotCare V0.4 Sprint 1 鑷姩鍖栨祴璇曟柟妗?
 
-**版本**: v1.0
-**日期**: 2026-06-12
-**负责人**: dev (开发工程师)
+**鐗堟湰**: v1.0
+**鏃ユ湡**: 2026-06-12
+**璐熻矗浜?*: dev (寮€鍙戝伐绋嬪笀)
 
 ---
 
-## 1. 测试范围
+## 1. 娴嬭瘯鑼冨洿
 
-### 1.1 测试目标
-验证 V0.4 Sprint 1 新增功能的 API 正确性、边界条件和错误处理。
+### 1.1 娴嬭瘯鐩爣
+楠岃瘉 V0.4 Sprint 1 鏂板鍔熻兘鐨?API 姝ｇ‘鎬с€佽竟鐣屾潯浠跺拰閿欒澶勭悊銆?
 
-### 1.2 功能范围
+### 1.2 鍔熻兘鑼冨洿
 
-| 模块 | API 数量 | 测试用例数 |
+| 妯″潡 | API 鏁伴噺 | 娴嬭瘯鐢ㄤ緥鏁?|
 |------|---------|-----------|
-| 用户认证 | 4 | 4 |
-| 密码重置 | 3 | 5 |
-| 个人信息 | 4 | 5 |
-| 消息中心 | 6 | 5 |
-| 健康档案 | 2 | 2 |
-| **总计** | **19** | **21** |
+| 鐢ㄦ埛璁よ瘉 | 4 | 4 |
+| 瀵嗙爜閲嶇疆 | 3 | 5 |
+| 涓汉淇℃伅 | 4 | 5 |
+| 娑堟伅涓績 | 6 | 5 |
+| 鍋ュ悍妗ｆ | 2 | 2 |
+| **鎬昏** | **19** | **21** |
 
 ---
 
-## 2. 测试用例列表
+## 2. 娴嬭瘯鐢ㄤ緥鍒楄〃
 
-### 2.1 用户认证测试
+### 2.1 鐢ㄦ埛璁よ瘉娴嬭瘯
 
-| 编号 | 测试用例 | 验证点 |
+| 缂栧彿 | 娴嬭瘯鐢ㄤ緥 | 楠岃瘉鐐?|
 |------|---------|-------|
-| UC-01 | test_register_new_user | 注册成功，返回 token |
-| UC-02 | test_register_duplicate_phone | 重复手机号返回 400 |
-| UC-03 | test_login_success | 登录成功，返回 token |
-| UC-04 | test_login_wrong_password | 密码错误返回 401 |
+| UC-01 | test_register_new_user | 娉ㄥ唽鎴愬姛锛岃繑鍥?token |
+| UC-02 | test_register_duplicate_phone | 閲嶅鎵嬫満鍙疯繑鍥?400 |
+| UC-03 | test_login_success | 鐧诲綍鎴愬姛锛岃繑鍥?token |
+| UC-04 | test_login_wrong_password | 瀵嗙爜閿欒杩斿洖 401 |
 
-### 2.2 密码重置测试
+### 2.2 瀵嗙爜閲嶇疆娴嬭瘯
 
-| 编号 | 测试用例 | 验证点 |
+| 缂栧彿 | 娴嬭瘯鐢ㄤ緥 | 楠岃瘉鐐?|
 |------|---------|-------|
-| PR-01 | test_request_password_reset | 请求成功 |
-| PR-02 | test_password_reset_frequency_limit | 第4次请求返回 429 |
-| PR-03 | test_confirm_password_reset | 有效 Token 重置成功 |
-| PR-04 | test_confirm_expired_token | 过期 Token 返回 400 |
-| PR-05 | test_password_strength_validation | 弱密码返回 400 |
+| PR-01 | test_request_password_reset | 璇锋眰鎴愬姛 |
+| PR-02 | test_password_reset_frequency_limit | 绗?娆¤姹傝繑鍥?429 |
+| PR-03 | test_confirm_password_reset | 鏈夋晥 Token 閲嶇疆鎴愬姛 |
+| PR-04 | test_confirm_expired_token | 杩囨湡 Token 杩斿洖 400 |
+| PR-05 | test_password_strength_validation | 寮卞瘑鐮佽繑鍥?400 |
 
-### 2.3 个人信息测试
+### 2.3 涓汉淇℃伅娴嬭瘯
 
-| 编号 | 测试用例 | 验证点 |
+| 缂栧彿 | 娴嬭瘯鐢ㄤ緥 | 楠岃瘉鐐?|
 |------|---------|-------|
-| PF-01 | test_get_profile | 获取个人信息成功 |
-| PF-02 | test_update_profile | 更新昵称/邮箱成功 |
-| PF-03 | test_update_duplicate_email | 已占用邮箱返回 400 |
-| PF-04 | test_change_password | 修改密码成功 |
-| PF-05 | test_change_password_wrong_old | 旧密码错误返回 400 |
+| PF-01 | test_get_profile | 鑾峰彇涓汉淇℃伅鎴愬姛 |
+| PF-02 | test_update_profile | 鏇存柊鏄电О/閭鎴愬姛 |
+| PF-03 | test_update_duplicate_email | 宸插崰鐢ㄩ偖绠辫繑鍥?400 |
+| PF-04 | test_change_password | 淇敼瀵嗙爜鎴愬姛 |
+| PF-05 | test_change_password_wrong_old | 鏃у瘑鐮侀敊璇繑鍥?400 |
 
-### 2.4 消息中心测试
+### 2.4 娑堟伅涓績娴嬭瘯
 
-| 编号 | 测试用例 | 验证点 |
+| 缂栧彿 | 娴嬭瘯鐢ㄤ緥 | 楠岃瘉鐐?|
 |------|---------|-------|
-| NT-01 | test_create_notification | 创建消息成功 |
-| NT-02 | test_list_notifications | 分页列表正确 |
-| NT-03 | test_unread_count | 未读计数正确 |
-| NT-04 | test_mark_notification_read | 单条标记已读 |
-| NT-05 | test_mark_all_read | 批量标记已读 |
+| NT-01 | test_create_notification | 鍒涘缓娑堟伅鎴愬姛 |
+| NT-02 | test_list_notifications | 鍒嗛〉鍒楄〃姝ｇ‘ |
+| NT-03 | test_unread_count | 鏈璁℃暟姝ｇ‘ |
+| NT-04 | test_mark_notification_read | 鍗曟潯鏍囪宸茶 |
+| NT-05 | test_mark_all_read | 鎵归噺鏍囪宸茶 |
 
-### 2.5 健康档案测试
+### 2.5 鍋ュ悍妗ｆ娴嬭瘯
 
-| 编号 | 测试用例 | 验证点 |
+| 缂栧彿 | 娴嬭瘯鐢ㄤ緥 | 楠岃瘉鐐?|
 |------|---------|-------|
-| HO-01 | test_health_overview_single | 单鹦鹉总览正确 |
-| HO-02 | test_health_overview_all | 全鹦鹉总览正确 |
+| HO-01 | test_health_overview_single | 鍗曢功楣夋€昏姝ｇ‘ |
+| HO-02 | test_health_overview_all | 鍏ㄩ功楣夋€昏姝ｇ‘ |
 
 ---
 
-## 3. 测试环境配置
+## 3. 娴嬭瘯鐜閰嶇疆
 
-### 3.1 技术栈
+### 3.1 鎶€鏈爤
 
-| 类别 | 工具 | 版本 |
+| 绫诲埆 | 宸ュ叿 | 鐗堟湰 |
 |------|------|------|
-| 测试框架 | pytest | >=7.4.0 |
-| 异步支持 | pytest-asyncio | >=0.21.0 |
-| HTTP 客户端 | httpx | >=0.24.0 |
-| 数据库 | SQLite (内存) | via aiosqlite |
+| 娴嬭瘯妗嗘灦 | pytest | >=7.4.0 |
+| 寮傛鏀寔 | pytest-asyncio | >=0.21.0 |
+| HTTP 瀹㈡埛绔?| httpx | >=0.24.0 |
+| 鏁版嵁搴?| SQLite (鍐呭瓨) | via aiosqlite |
 | ORM | SQLAlchemy | >=2.0.0 |
 
-### 3.2 测试数据库
+### 3.2 娴嬭瘯鏁版嵁搴?
 
-- 使用 SQLite 内存数据库 (:memory:)
-- 每个测试独立数据库实例
-- 测试结束后事务回滚
+- 浣跨敤 SQLite 鍐呭瓨鏁版嵁搴?(:memory:)
+- 姣忎釜娴嬭瘯鐙珛鏁版嵁搴撳疄渚?
+- 娴嬭瘯缁撴潫鍚庝簨鍔″洖婊?
 
-### 3.3 测试隔离
+### 3.3 娴嬭瘯闅旂
 
-- 每个测试函数独立的 db_session
-- 使用 fixture 注入测试用户
-- auth_client 自动携带认证 token
+- 姣忎釜娴嬭瘯鍑芥暟鐙珛鐨?db_session
+- 浣跨敤 fixture 娉ㄥ叆娴嬭瘯鐢ㄦ埛
+- auth_client 鑷姩鎼哄甫璁よ瘉 token
 
 ---
 
-## 4. 运行方式
+## 4. 杩愯鏂瑰紡
 
-### 4.1 安装测试依赖
+### 4.1 瀹夎娴嬭瘯渚濊禆
 `ash
 cd backend
 pip install -r requirements.txt
 `
 
-### 4.2 运行全部测试
+### 4.2 杩愯鍏ㄩ儴娴嬭瘯
 `ash
 cd backend
 pytest test_sprint1.py -v
 `
 
-### 4.3 运行单个测试
+### 4.3 杩愯鍗曚釜娴嬭瘯
 `ash
 pytest test_sprint1.py::test_register_new_user -v
 `
 
-### 4.4 运行指定模块测试
+### 4.4 杩愯鎸囧畾妯″潡娴嬭瘯
 `ash
 pytest test_sprint1.py -k "password" -v
 `
 
-### 4.5 查看测试覆盖率（可选）
+### 4.5 鏌ョ湅娴嬭瘯瑕嗙洊鐜囷紙鍙€夛級
 `ash
 pytest test_sprint1.py --cov=app --cov-report=html
 `
 
 ---
 
-## 5. 测试结果预期
+## 5. 娴嬭瘯缁撴灉棰勬湡
 
-| 模块 | 预期结果 | 备注 |
+| 妯″潡 | 棰勬湡缁撴灉 | 澶囨敞 |
 |------|---------|------|
-| 用户认证 | 全部通过 | 基础功能 |
-| 密码重置 | 全部通过 | 含频率限制验证 |
-| 个人信息 | 全部通过 | 含唯一性验证 |
-| 消息中心 | 全部通过 | 含分页验证 |
-| 健康档案 | 全部通过 | 含统计计算验证 |
+| 鐢ㄦ埛璁よ瘉 | 鍏ㄩ儴閫氳繃 | 鍩虹鍔熻兘 |
+| 瀵嗙爜閲嶇疆 | 鍏ㄩ儴閫氳繃 | 鍚鐜囬檺鍒堕獙璇?|
+| 涓汉淇℃伅 | 鍏ㄩ儴閫氳繃 | 鍚敮涓€鎬ч獙璇?|
+| 娑堟伅涓績 | 鍏ㄩ儴閫氳繃 | 鍚垎椤甸獙璇?|
+| 鍋ュ悍妗ｆ | 鍏ㄩ儴閫氳繃 | 鍚粺璁¤绠楅獙璇?|
 
-**预期总计**: 21 个测试用例全部通过
+**棰勬湡鎬昏**: 21 涓祴璇曠敤渚嬪叏閮ㄩ€氳繃
 
 ---
 
-## 6. 附录
+## 6. 闄勫綍
 
-### 6.1 测试文件结构
+### 6.1 娴嬭瘯鏂囦欢缁撴瀯
 `
 backend/
-├── conftest.py          # 测试配置和 fixtures
-├── test_sprint1.py      # Sprint 1 测试用例
-└── requirements.txt     # 包含测试依赖
+鈹溾攢鈹€ conftest.py          # 娴嬭瘯閰嶇疆鍜?fixtures
+鈹溾攢鈹€ test_sprint1.py      # Sprint 1 娴嬭瘯鐢ㄤ緥
+鈹斺攢鈹€ requirements.txt     # 鍖呭惈娴嬭瘯渚濊禆
 `
 
-### 6.2 关键 fixtures
+### 6.2 鍏抽敭 fixtures
 
-| Fixture | 作用 |
+| Fixture | 浣滅敤 |
 |---------|------|
-| db_session | 异步数据库会话（事务回滚） |
-| client | 异步 HTTP 客户端 |
-| test_user | 测试用户（已注册） |
+| db_session | 寮傛鏁版嵁搴撲細璇濓紙浜嬪姟鍥炴粴锛?|
+| client | 寮傛 HTTP 瀹㈡埛绔?|
+| test_user | 娴嬭瘯鐢ㄦ埛锛堝凡娉ㄥ唽锛?|
 | auth_token | JWT token |
-| auth_client | 带认证的 HTTP 客户端 |
+| auth_client | 甯﹁璇佺殑 HTTP 瀹㈡埛绔?|
 
 ---
 
-**文档结束**
+**鏂囨。缁撴潫**

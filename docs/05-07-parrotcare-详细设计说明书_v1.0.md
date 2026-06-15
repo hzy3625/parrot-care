@@ -1,251 +1,251 @@
-# ParrotCare AI — 详细设计说明书
+# ParrotCare AI 鈥?璇︾粏璁捐璇存槑涔?
 
-**文档版本**: V1.0
-**创建日期**: 2026-06-12
-**项目名称**: ParrotCare AI
-**对应需求**: REQ-PARROT-001 / REQ-PARROT-002 / REQ-PARROT-003
+**鏂囨。鐗堟湰**: V1.0
+**鍒涘缓鏃ユ湡**: 2026-06-12
+**椤圭洰鍚嶇О**: ParrotCare AI
+**瀵瑰簲闇€姹?*: REQ-PARROT-001 / REQ-PARROT-002 / REQ-PARROT-003
 
 ---
 
-## 一、系统架构
+## 涓€銆佺郴缁熸灦鏋?
 
-### 1.1 技术栈
+### 1.1 鎶€鏈爤
 
-| 层级 | 技术选型 | 说明 |
+| 灞傜骇 | 鎶€鏈€夊瀷 | 璇存槑 |
 |------|---------|------|
-| 后端框架 | FastAPI (Python 3.10+) | 异步高性能，自动 API 文档 |
-| 数据库 | SQLite (MVP) → PostgreSQL (生产) | 关系型数据存储 |
-| ORM | SQLAlchemy 2.0 | 数据库模型映射 |
-| AI 引擎 | librosa + 规则引擎 (MVP) → PyTorch (V1.0+) | 音频特征提取 + 分类 |
-| 前端 | HTML5 + Bootstrap 5 (MVP) | 响应式 Web 应用 |
-| 实时通信 | WebSocket (WebSocketManager) | 实时推送异常告警 |
-| 容器化 | Docker + Docker Compose | 开发/部署环境 |
+| 鍚庣妗嗘灦 | FastAPI (Python 3.10+) | 寮傛楂樻€ц兘锛岃嚜鍔?API 鏂囨。 |
+| 鏁版嵁搴?| SQLite (MVP) 鈫?PostgreSQL (鐢熶骇) | 鍏崇郴鍨嬫暟鎹瓨鍌?|
+| ORM | SQLAlchemy 2.0 | 鏁版嵁搴撴ā鍨嬫槧灏?|
+| AI 寮曟搸 | librosa + 瑙勫垯寮曟搸 (MVP) 鈫?PyTorch (V1.0+) | 闊抽鐗瑰緛鎻愬彇 + 鍒嗙被 |
+| 鍓嶇 | HTML5 + Bootstrap 5 (MVP) | 鍝嶅簲寮?Web 搴旂敤 |
+| 瀹炴椂閫氫俊 | WebSocket (WebSocketManager) | 瀹炴椂鎺ㄩ€佸紓甯稿憡璀?|
+| 瀹瑰櫒鍖?| Docker + Docker Compose | 寮€鍙?閮ㄧ讲鐜 |
 
-### 1.2 项目结构
+### 1.2 椤圭洰缁撴瀯
 
 ```
 parrot-care/
-├── backend/
-│   ├── app/
-│   │   ├── api/              # API 路由层
-│   │   │   ├── users.py      # 用户注册、登录
-│   │   │   ├── parrots.py    # 鹦鹉档案管理
-│   │   │   ├── events.py     # 事件查询、统计
-│   │   │   └── audio.py      # 音频上传、分类
-│   │   ├── models/           # 数据模型层
-│   │   │   ├── database.py   # SQLAlchemy ORM 模型
-│   │   │   └── schemas.py    # Pydantic 请求/响应 Schema
-│   │   ├── services/         # 业务逻辑层
-│   │   │   ├── audio_classifier.py   # 音频分类服务
-│   │   │   └── realtime_analyzer.py  # 实时分析服务
-│   │   ├── config.py         # 配置管理
-│   │   └── db.py             # 数据库初始化
-│   ├── main.py               # 应用入口
-│   ├── start.py              # 启动脚本
-│   ├── requirements.txt      # Python 依赖
-│   ├── dockerfile            # 容器构建
-│   └── .env.example          # 环境变量模板
-├── web_app/
-│   └── index.html            # Web 前端入口
-├── docker-compose.yml        # 容器编排
-└── docs/                     # 项目文档
+鈹溾攢鈹€ backend/
+鈹?  鈹溾攢鈹€ app/
+鈹?  鈹?  鈹溾攢鈹€ api/              # API 璺敱灞?
+鈹?  鈹?  鈹?  鈹溾攢鈹€ users.py      # 鐢ㄦ埛娉ㄥ唽銆佺櫥褰?
+鈹?  鈹?  鈹?  鈹溾攢鈹€ parrots.py    # 楣﹂箟妗ｆ绠＄悊
+鈹?  鈹?  鈹?  鈹溾攢鈹€ events.py     # 浜嬩欢鏌ヨ銆佺粺璁?
+鈹?  鈹?  鈹?  鈹斺攢鈹€ audio.py      # 闊抽涓婁紶銆佸垎绫?
+鈹?  鈹?  鈹溾攢鈹€ models/           # 鏁版嵁妯″瀷灞?
+鈹?  鈹?  鈹?  鈹溾攢鈹€ database.py   # SQLAlchemy ORM 妯″瀷
+鈹?  鈹?  鈹?  鈹斺攢鈹€ schemas.py    # Pydantic 璇锋眰/鍝嶅簲 Schema
+鈹?  鈹?  鈹溾攢鈹€ services/         # 涓氬姟閫昏緫灞?
+鈹?  鈹?  鈹?  鈹溾攢鈹€ audio_classifier.py   # 闊抽鍒嗙被鏈嶅姟
+鈹?  鈹?  鈹?  鈹斺攢鈹€ realtime_analyzer.py  # 瀹炴椂鍒嗘瀽鏈嶅姟
+鈹?  鈹?  鈹溾攢鈹€ config.py         # 閰嶇疆绠＄悊
+鈹?  鈹?  鈹斺攢鈹€ db.py             # 鏁版嵁搴撳垵濮嬪寲
+鈹?  鈹溾攢鈹€ main.py               # 搴旂敤鍏ュ彛
+鈹?  鈹溾攢鈹€ start.py              # 鍚姩鑴氭湰
+鈹?  鈹溾攢鈹€ requirements.txt      # Python 渚濊禆
+鈹?  鈹溾攢鈹€ dockerfile            # 瀹瑰櫒鏋勫缓
+鈹?  鈹斺攢鈹€ .env.example          # 鐜鍙橀噺妯℃澘
+鈹溾攢鈹€ web_app/
+鈹?  鈹斺攢鈹€ index.html            # Web 鍓嶇鍏ュ彛
+鈹溾攢鈹€ docker-compose.yml        # 瀹瑰櫒缂栨帓
+鈹斺攢鈹€ docs/                     # 椤圭洰鏂囨。
 ```
 
-### 1.3 模块设计
+### 1.3 妯″潡璁捐
 
 ```
-┌─────────────────────────────────────────────────┐
-│                  FastAPI Application             │
-├─────────────┬─────────────┬─────────┬───────────┤
-│  Users API  │ Parrots API │ Events  │ Audio API │
-│  路由层     │  路由层     │  路由层 │  路由层   │
-├─────────────┴─────────────┴─────────┴───────────┤
-│              Pydantic Schemas (数据验证)         │
-├─────────────┬───────────────────────────────────┤
-│  SQLAlchemy │  Business Services                │
-│  ORM Models │  ┌─────────────┬───────────────┐  │
-│             │  │AudioClassifier│RealtimeAnalyzer│  │
-├─────────────┴──┴─────────────┴───────────────┴──┤
-│              SQLite / PostgreSQL                 │
-└─────────────────────────────────────────────────┘
+鈹屸攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹?
+鈹?                 FastAPI Application             鈹?
+鈹溾攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹?
+鈹? Users API  鈹?Parrots API 鈹?Events  鈹?Audio API 鈹?
+鈹? 璺敱灞?    鈹? 璺敱灞?    鈹? 璺敱灞?鈹? 璺敱灞?  鈹?
+鈹溾攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹粹攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹粹攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹粹攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹?
+鈹?             Pydantic Schemas (鏁版嵁楠岃瘉)         鈹?
+鈹溾攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹?
+鈹? SQLAlchemy 鈹? Business Services                鈹?
+鈹? ORM Models 鈹? 鈹屸攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹? 鈹?
+鈹?            鈹? 鈹侫udioClassifier鈹俁ealtimeAnalyzer鈹? 鈹?
+鈹溾攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹粹攢鈹€鈹粹攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹粹攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹粹攢鈹€鈹?
+鈹?             SQLite / PostgreSQL                 鈹?
+鈹斺攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹?
 ```
 
 ---
 
-## 二、数据库设计
+## 浜屻€佹暟鎹簱璁捐
 
-### 2.1 ER 图
+### 2.1 ER 鍥?
 
 ```
-users ────< parrots ────< media_events ────< user_feedback
-  │           │              │
-  └──< devices │              │
-               └────> behavior_daily_stats
+users 鈹€鈹€鈹€鈹€< parrots 鈹€鈹€鈹€鈹€< media_events 鈹€鈹€鈹€鈹€< user_feedback
+  鈹?          鈹?             鈹?
+  鈹斺攢鈹€< devices 鈹?             鈹?
+               鈹斺攢鈹€鈹€鈹€> behavior_daily_stats
 ```
 
-### 2.2 表结构
+### 2.2 琛ㄧ粨鏋?
 
-#### users 表
+#### users 琛?
 
-| 字段 | 类型 | 约束 | 说明 |
+| 瀛楁 | 绫诲瀷 | 绾︽潫 | 璇存槑 |
 |------|------|------|------|
 | user_id | VARCHAR(64) | PK | UUID |
-| nickname | VARCHAR(100) | NULL | 昵称 |
-| phone | VARCHAR(30) | UNIQUE, INDEX | 手机号 |
-| email | VARCHAR(100) | UNIQUE, INDEX | 邮箱 |
-| password_hash | VARCHAR(255) | NOT NULL | bcrypt 哈希 |
-| subscription_status | VARCHAR(30) | DEFAULT 'free' | 订阅状态 |
-| created_at | DATETIME | DEFAULT NOW | 创建时间 |
+| nickname | VARCHAR(100) | NULL | 鏄电О |
+| phone | VARCHAR(30) | UNIQUE, INDEX | 鎵嬫満鍙?|
+| email | VARCHAR(100) | UNIQUE, INDEX | 閭 |
+| password_hash | VARCHAR(255) | NOT NULL | bcrypt 鍝堝笇 |
+| subscription_status | VARCHAR(30) | DEFAULT 'free' | 璁㈤槄鐘舵€?|
+| created_at | DATETIME | DEFAULT NOW | 鍒涘缓鏃堕棿 |
 
-#### parrots 表
+#### parrots 琛?
 
-| 字段 | 类型 | 约束 | 说明 |
+| 瀛楁 | 绫诲瀷 | 绾︽潫 | 璇存槑 |
 |------|------|------|------|
 | parrot_id | VARCHAR(64) | PK | UUID |
-| user_id | VARCHAR(64) | FK → users | 所属用户 |
-| name | VARCHAR(100) | NOT NULL | 名称 |
-| species | VARCHAR(100) | NOT NULL | 品种 |
-| age | INTEGER | NULL | 年龄 |
-| gender | VARCHAR(30) | NULL | 性别 |
-| weight | DECIMAL(6,2) | NULL | 体重(g) |
-| has_plucking_history | BOOLEAN | DEFAULT FALSE | 拔毛史 |
-| has_night_fright_history | BOOLEAN | DEFAULT FALSE | 夜惊史 |
-| created_at | DATETIME | DEFAULT NOW | 创建时间 |
+| user_id | VARCHAR(64) | FK 鈫?users | 鎵€灞炵敤鎴?|
+| name | VARCHAR(100) | NOT NULL | 鍚嶇О |
+| species | VARCHAR(100) | NOT NULL | 鍝佺 |
+| age | INTEGER | NULL | 骞撮緞 |
+| gender | VARCHAR(30) | NULL | 鎬у埆 |
+| weight | DECIMAL(6,2) | NULL | 浣撻噸(g) |
+| has_plucking_history | BOOLEAN | DEFAULT FALSE | 鎷旀瘺鍙?|
+| has_night_fright_history | BOOLEAN | DEFAULT FALSE | 澶滄儕鍙?|
+| created_at | DATETIME | DEFAULT NOW | 鍒涘缓鏃堕棿 |
 
-#### media_events 表
+#### media_events 琛?
 
-| 字段 | 类型 | 约束 | 说明 |
+| 瀛楁 | 绫诲瀷 | 绾︽潫 | 璇存槑 |
 |------|------|------|------|
 | event_id | VARCHAR(64) | PK | UUID |
-| parrot_id | VARCHAR(64) | FK → parrots | 所属鹦鹉 |
-| device_id | VARCHAR(64) | FK → devices, NULL | 设备 ID |
-| event_time | DATETIME | INDEX | 事件时间 |
-| event_type | VARCHAR(100) | NOT NULL | 行为类型 |
-| media_type | VARCHAR(30) | NOT NULL | 媒体类型 |
-| audio_url | TEXT | NULL | 音频 URL |
-| video_url | TEXT | NULL | 视频 URL |
-| duration | DECIMAL(8,2) | NULL | 时长(秒) |
-| confidence | DECIMAL(5,4) | NULL | 分类置信度 |
-| is_abnormal | BOOLEAN | DEFAULT FALSE | 是否异常 |
-| risk_level | VARCHAR(30) | NULL | 风险等级 |
-| created_at | DATETIME | DEFAULT NOW | 创建时间 |
+| parrot_id | VARCHAR(64) | FK 鈫?parrots | 鎵€灞為功楣?|
+| device_id | VARCHAR(64) | FK 鈫?devices, NULL | 璁惧 ID |
+| event_time | DATETIME | INDEX | 浜嬩欢鏃堕棿 |
+| event_type | VARCHAR(100) | NOT NULL | 琛屼负绫诲瀷 |
+| media_type | VARCHAR(30) | NOT NULL | 濯掍綋绫诲瀷 |
+| audio_url | TEXT | NULL | 闊抽 URL |
+| video_url | TEXT | NULL | 瑙嗛 URL |
+| duration | DECIMAL(8,2) | NULL | 鏃堕暱(绉? |
+| confidence | DECIMAL(5,4) | NULL | 鍒嗙被缃俊搴?|
+| is_abnormal | BOOLEAN | DEFAULT FALSE | 鏄惁寮傚父 |
+| risk_level | VARCHAR(30) | NULL | 椋庨櫓绛夌骇 |
+| created_at | DATETIME | DEFAULT NOW | 鍒涘缓鏃堕棿 |
 
-#### user_feedback 表
+#### user_feedback 琛?
 
-| 字段 | 类型 | 约束 | 说明 |
+| 瀛楁 | 绫诲瀷 | 绾︽潫 | 璇存槑 |
 |------|------|------|------|
 | feedback_id | VARCHAR(64) | PK | UUID |
-| event_id | VARCHAR(64) | FK → media_events | 关联事件 |
-| user_id | VARCHAR(64) | FK → users | 用户 ID |
-| feedback_type | VARCHAR(50) | NOT NULL | 反馈类型 |
-| feedback_label | VARCHAR(100) | NULL | 反馈标签 |
-| comment | TEXT | NULL | 补充说明 |
-| created_at | DATETIME | DEFAULT NOW | 创建时间 |
+| event_id | VARCHAR(64) | FK 鈫?media_events | 鍏宠仈浜嬩欢 |
+| user_id | VARCHAR(64) | FK 鈫?users | 鐢ㄦ埛 ID |
+| feedback_type | VARCHAR(50) | NOT NULL | 鍙嶉绫诲瀷 |
+| feedback_label | VARCHAR(100) | NULL | 鍙嶉鏍囩 |
+| comment | TEXT | NULL | 琛ュ厖璇存槑 |
+| created_at | DATETIME | DEFAULT NOW | 鍒涘缓鏃堕棿 |
 
-#### behavior_daily_stats 表
+#### behavior_daily_stats 琛?
 
-| 字段 | 类型 | 约束 | 说明 |
+| 瀛楁 | 绫诲瀷 | 绾︽潫 | 璇存槑 |
 |------|------|------|------|
 | stat_id | VARCHAR(64) | PK | UUID |
-| parrot_id | VARCHAR(64) | FK → parrots | 所属鹦鹉 |
-| stat_date | DATETIME | INDEX | 统计日期 |
-| chirp_count | INTEGER | DEFAULT 0 | 鸣叫次数 |
-| scream_count | INTEGER | DEFAULT 0 | 尖叫次数 |
-| night_activity_count | INTEGER | DEFAULT 0 | 夜间活动次数 |
-| active_minutes | INTEGER | DEFAULT 0 | 活跃分钟数 |
-| quiet_minutes | INTEGER | DEFAULT 0 | 安静分钟数 |
-| abnormal_event_count | INTEGER | DEFAULT 0 | 异常事件数 |
-| health_score | INTEGER | DEFAULT 100 | 健康评分 |
+| parrot_id | VARCHAR(64) | FK 鈫?parrots | 鎵€灞為功楣?|
+| stat_date | DATETIME | INDEX | 缁熻鏃ユ湡 |
+| chirp_count | INTEGER | DEFAULT 0 | 楦ｅ彨娆℃暟 |
+| scream_count | INTEGER | DEFAULT 0 | 灏栧彨娆℃暟 |
+| night_activity_count | INTEGER | DEFAULT 0 | 澶滈棿娲诲姩娆℃暟 |
+| active_minutes | INTEGER | DEFAULT 0 | 娲昏穬鍒嗛挓鏁?|
+| quiet_minutes | INTEGER | DEFAULT 0 | 瀹夐潤鍒嗛挓鏁?|
+| abnormal_event_count | INTEGER | DEFAULT 0 | 寮傚父浜嬩欢鏁?|
+| health_score | INTEGER | DEFAULT 100 | 鍋ュ悍璇勫垎 |
 
 ---
 
-## 三、API 设计
+## 涓夈€丄PI 璁捐
 
-### 3.1 用户模块 `/api/users`
+### 3.1 鐢ㄦ埛妯″潡 `/api/users`
 
-| 方法 | 路径 | 说明 | 请求体 | 响应 |
+| 鏂规硶 | 璺緞 | 璇存槑 | 璇锋眰浣?| 鍝嶅簲 |
 |------|------|------|--------|------|
-| POST | `/register` | 用户注册 | phone, password, nickname | UserResponse |
-| POST | `/login` | 用户登录 | phone, password | TokenResponse |
+| POST | `/register` | 鐢ㄦ埛娉ㄥ唽 | phone, password, nickname | UserResponse |
+| POST | `/login` | 鐢ㄦ埛鐧诲綍 | phone, password | TokenResponse |
 
-### 3.2 鹦鹉模块 `/api/parrots`
+### 3.2 楣﹂箟妯″潡 `/api/parrots`
 
-| 方法 | 路径 | 说明 | 请求体 | 响应 |
+| 鏂规硶 | 璺緞 | 璇存槑 | 璇锋眰浣?| 鍝嶅簲 |
 |------|------|------|--------|------|
-| POST | `/` | 创建鹦鹉档案 | ParrotCreate | ParrotResponse |
-| GET | `/` | 获取用户所有鹦鹉 | — | List[ParrotResponse] |
-| GET | `/{parrot_id}` | 获取鹦鹉详情 | — | ParrotResponse |
-| GET | `/{parrot_id}/summary` | 获取鹦鹉健康摘要 | — | ParrotSummary |
+| POST | `/` | 鍒涘缓楣﹂箟妗ｆ | ParrotCreate | ParrotResponse |
+| GET | `/` | 鑾峰彇鐢ㄦ埛鎵€鏈夐功楣?| 鈥?| List[ParrotResponse] |
+| GET | `/{parrot_id}` | 鑾峰彇楣﹂箟璇︽儏 | 鈥?| ParrotResponse |
+| GET | `/{parrot_id}/summary` | 鑾峰彇楣﹂箟鍋ュ悍鎽樿 | 鈥?| ParrotSummary |
 
-### 3.3 事件模块 `/api/events`
+### 3.3 浜嬩欢妯″潡 `/api/events`
 
-| 方法 | 路径 | 说明 | 请求体 | 响应 |
+| 鏂规硶 | 璺緞 | 璇存槑 | 璇锋眰浣?| 鍝嶅簲 |
 |------|------|------|--------|------|
-| POST | `/` | 创建事件记录 | EventCreate | EventDetail |
-| GET | `/parrot/{parrot_id}` | 获取鹦鹉事件列表 | days (query) | List[EventDetail] |
-| GET | `/abnormal/parrot/{parrot_id}` | 获取异常事件列表 | days (query) | List[EventDetail] |
-| GET | `/today-summary/parrot/{parrot_id}` | 获取今日摘要 | — | ParrotSummary |
+| POST | `/` | 鍒涘缓浜嬩欢璁板綍 | EventCreate | EventDetail |
+| GET | `/parrot/{parrot_id}` | 鑾峰彇楣﹂箟浜嬩欢鍒楄〃 | days (query) | List[EventDetail] |
+| GET | `/abnormal/parrot/{parrot_id}` | 鑾峰彇寮傚父浜嬩欢鍒楄〃 | days (query) | List[EventDetail] |
+| GET | `/today-summary/parrot/{parrot_id}` | 鑾峰彇浠婃棩鎽樿 | 鈥?| ParrotSummary |
 
-### 3.4 音频模块 `/api/audio`
+### 3.4 闊抽妯″潡 `/api/audio`
 
-| 方法 | 路径 | 说明 | 请求体 | 响应 |
+| 鏂规硶 | 璺緞 | 璇存槑 | 璇锋眰浣?| 鍝嶅簲 |
 |------|------|------|--------|------|
-| POST | `/upload` | 上传音频并分类 | AudioUpload | EventResponse |
-| POST | `/upload-and-analyze` | 上传 + 实时分析 | AudioUpload | EventResponse |
+| POST | `/upload` | 涓婁紶闊抽骞跺垎绫?| AudioUpload | EventResponse |
+| POST | `/upload-and-analyze` | 涓婁紶 + 瀹炴椂鍒嗘瀽 | AudioUpload | EventResponse |
 
 ---
 
-## 四、核心业务逻辑
+## 鍥涖€佹牳蹇冧笟鍔￠€昏緫
 
-### 4.1 音频分类引擎 (AudioClassifier)
-
-```
-输入: 音频文件 (URL 或本地路径)
-  ↓
-1. 使用 librosa 提取音频特征
-   - MFCC 系数
-   - 频谱质心
-   - 过零率
-   - 频谱带宽
-   - 频谱对比度
-  ↓
-2. 规则引擎分类 (MVP)
-   - 高频 + 高能量 + 短持续 → scream (尖叫)
-   - 中频 + 间歇 + 中等能量 → wing_flap (扑翅)
-   - 低频 + 突发高能量 → cage_bump (撞笼)
-   - 其他 → normal_chirp (正常鸣叫)
-  ↓
-输出: 分类结果 + 置信度
-```
-
-### 4.2 实时分析服务 (RealtimeAnalyzer)
+### 4.1 闊抽鍒嗙被寮曟搸 (AudioClassifier)
 
 ```
-输入: 音频流 / 上传的音频事件
-  ↓
-1. 时间窗口分析 (5 秒窗口)
-  ↓
-2. 夜间模式检测 (22:00-06:00)
-   - 夜间活动频率阈值: 3 次/小时
-   - 超过阈值 → risk_level = "high"
-  ↓
-3. 异常事件判断
-   - 单事件异常 → risk_level = "low/medium"
-   - 连续异常 (3+) → risk_level = "high"
-  ↓
-4. WebSocket 实时推送
-   - 用户在线 → 推送事件通知
-   - 用户离线 → 标记为未读，下次登录显示
-  ↓
-5. 健康评分计算
-   - 基础分: 100
-   - 尖叫事件: -10/次
-   - 夜间异常: -15/次
-   - 撞笼事件: -20/次
-   - 最低分: 0
+杈撳叆: 闊抽鏂囦欢 (URL 鎴栨湰鍦拌矾寰?
+  鈫?
+1. 浣跨敤 librosa 鎻愬彇闊抽鐗瑰緛
+   - MFCC 绯绘暟
+   - 棰戣氨璐ㄥ績
+   - 杩囬浂鐜?
+   - 棰戣氨甯﹀
+   - 棰戣氨瀵规瘮搴?
+  鈫?
+2. 瑙勫垯寮曟搸鍒嗙被 (MVP)
+   - 楂橀 + 楂樿兘閲?+ 鐭寔缁?鈫?scream (灏栧彨)
+   - 涓 + 闂存瓏 + 涓瓑鑳介噺 鈫?wing_flap (鎵戠繀)
+   - 浣庨 + 绐佸彂楂樿兘閲?鈫?cage_bump (鎾炵)
+   - 鍏朵粬 鈫?normal_chirp (姝ｅ父楦ｅ彨)
+  鈫?
+杈撳嚭: 鍒嗙被缁撴灉 + 缃俊搴?
 ```
 
-### 4.3 健康评分算法
+### 4.2 瀹炴椂鍒嗘瀽鏈嶅姟 (RealtimeAnalyzer)
+
+```
+杈撳叆: 闊抽娴?/ 涓婁紶鐨勯煶棰戜簨浠?
+  鈫?
+1. 鏃堕棿绐楀彛鍒嗘瀽 (5 绉掔獥鍙?
+  鈫?
+2. 澶滈棿妯″紡妫€娴?(22:00-06:00)
+   - 澶滈棿娲诲姩棰戠巼闃堝€? 3 娆?灏忔椂
+   - 瓒呰繃闃堝€?鈫?risk_level = "high"
+  鈫?
+3. 寮傚父浜嬩欢鍒ゆ柇
+   - 鍗曚簨浠跺紓甯?鈫?risk_level = "low/medium"
+   - 杩炵画寮傚父 (3+) 鈫?risk_level = "high"
+  鈫?
+4. WebSocket 瀹炴椂鎺ㄩ€?
+   - 鐢ㄦ埛鍦ㄧ嚎 鈫?鎺ㄩ€佷簨浠堕€氱煡
+   - 鐢ㄦ埛绂荤嚎 鈫?鏍囪涓烘湭璇伙紝涓嬫鐧诲綍鏄剧ず
+  鈫?
+5. 鍋ュ悍璇勫垎璁＄畻
+   - 鍩虹鍒? 100
+   - 灏栧彨浜嬩欢: -10/娆?
+   - 澶滈棿寮傚父: -15/娆?
+   - 鎾炵浜嬩欢: -20/娆?
+   - 鏈€浣庡垎: 0
+```
+
+### 4.3 鍋ュ悍璇勫垎绠楁硶
 
 ```python
 def calculate_health_score(parrot_id: str, date: datetime) -> int:
@@ -266,51 +266,51 @@ def calculate_health_score(parrot_id: str, date: datetime) -> int:
 
 ---
 
-## 五、安全设计
+## 浜斻€佸畨鍏ㄨ璁?
 
-| 安全措施 | 实现方式 |
+| 瀹夊叏鎺柦 | 瀹炵幇鏂瑰紡 |
 |---------|---------|
-| 密码加密 | bcrypt (salt rounds=12) |
-| 认证方式 | JWT Bearer Token (有效期 24h) |
-| CORS | 开发环境: *, 生产环境: 白名单 |
-| 输入验证 | Pydantic Schema 自动校验 |
-| SQL 注入 | SQLAlchemy ORM (参数化查询) |
-| 文件上传 | 限制大小 < 10MB，仅允许音频格式 |
+| 瀵嗙爜鍔犲瘑 | bcrypt (salt rounds=12) |
+| 璁よ瘉鏂瑰紡 | JWT Bearer Token (鏈夋晥鏈?24h) |
+| CORS | 寮€鍙戠幆澧? *, 鐢熶骇鐜: 鐧藉悕鍗?|
+| 杈撳叆楠岃瘉 | Pydantic Schema 鑷姩鏍￠獙 |
+| SQL 娉ㄥ叆 | SQLAlchemy ORM (鍙傛暟鍖栨煡璇? |
+| 鏂囦欢涓婁紶 | 闄愬埗澶у皬 < 10MB锛屼粎鍏佽闊抽鏍煎紡 |
 
 ---
 
-## 六、部署架构
+## 鍏€侀儴缃叉灦鏋?
 
-### 6.1 开发环境
+### 6.1 寮€鍙戠幆澧?
 
 ```
 Docker Compose:
   - backend (FastAPI, port 8000)
-  - SQLite (内置，持久化卷)
+  - SQLite (鍐呯疆锛屾寔涔呭寲鍗?
 ```
 
-### 6.2 生产环境 (V1.0+)
+### 6.2 鐢熶骇鐜 (V1.0+)
 
 ```
 Docker Compose:
   - backend (FastAPI, Gunicorn workers)
-  - PostgreSQL (主数据库)
-  - Redis (缓存 + WebSocket 消息队列)
-  - MinIO (对象存储 - 音频/视频文件)
-  - Nginx (反向代理 + 静态文件)
+  - PostgreSQL (涓绘暟鎹簱)
+  - Redis (缂撳瓨 + WebSocket 娑堟伅闃熷垪)
+  - MinIO (瀵硅薄瀛樺偍 - 闊抽/瑙嗛鏂囦欢)
+  - Nginx (鍙嶅悜浠ｇ悊 + 闈欐€佹枃浠?
 ```
 
 ---
 
-## 七、MVP 开发计划
+## 涓冦€丮VP 寮€鍙戣鍒?
 
-| Sprint | 内容 | Story Points |
+| Sprint | 鍐呭 | Story Points |
 |--------|------|-------------|
-| V0.1 | 用户系统 + 鹦鹉档案 + 基础音频分类 | 11 |
-| V0.2 | 事件列表 + 异常检测 + 健康评分 | 11 |
-| V0.3 | 实时分析 + WebSocket 推送 + 用户反馈 | 9 |
+| V0.1 | 鐢ㄦ埛绯荤粺 + 楣﹂箟妗ｆ + 鍩虹闊抽鍒嗙被 | 11 |
+| V0.2 | 浜嬩欢鍒楄〃 + 寮傚父妫€娴?+ 鍋ュ悍璇勫垎 | 11 |
+| V0.3 | 瀹炴椂鍒嗘瀽 + WebSocket 鎺ㄩ€?+ 鐢ㄦ埛鍙嶉 | 9 |
 
 ---
 
-**文档状态**: V1.0 完成
-**下次更新**: V0.3 完成后补充实时分析详细设计
+**鏂囨。鐘舵€?*: V1.0 瀹屾垚
+**涓嬫鏇存柊**: V0.3 瀹屾垚鍚庤ˉ鍏呭疄鏃跺垎鏋愯缁嗚璁?

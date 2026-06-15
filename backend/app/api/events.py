@@ -1,5 +1,5 @@
 """
-事件 API 路由
+浜嬩欢 API 璺敱
 """
 
 from fastapi import APIRouter, HTTPException, Depends
@@ -22,7 +22,7 @@ async def list_events(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    # 构建查询
+    # 鏋勫缓鏌ヨ
     query = select(MediaEvent).join(Parrot).where(Parrot.user_id == current_user.user_id)
     
     if parrot_id:
@@ -65,7 +65,7 @@ async def get_event(
     event = result.scalar_one_or_none()
     
     if not event:
-        raise HTTPException(status_code=404, detail="事件不存在")
+        raise HTTPException(status_code=404, detail="浜嬩欢涓嶅瓨鍦?)
     
     return EventDetail(
         event_id=event.event_id,
@@ -88,7 +88,7 @@ async def create_feedback(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    # 验证事件归属
+    # 楠岃瘉浜嬩欢褰掑睘
     result = await db.execute(
         select(MediaEvent).join(Parrot).where(
             MediaEvent.event_id == event_id,
@@ -97,7 +97,7 @@ async def create_feedback(
     )
     event = result.scalar_one_or_none()
     if not event:
-        raise HTTPException(status_code=404, detail="事件不存在")
+        raise HTTPException(status_code=404, detail="浜嬩欢涓嶅瓨鍦?)
     
     feedback = UserFeedback(
         feedback_id=generate_id(),

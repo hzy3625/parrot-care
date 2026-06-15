@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""用户 API 路由 - Sprint 1 增强版"""
+"""鐢ㄦ埛 API 璺敱 - Sprint 1 澧炲己鐗?""
 
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -50,21 +50,21 @@ async def get_current_user(
         )
         user_id = payload.get("user_id")
         if not user_id:
-            raise HTTPException(status_code=401, detail="无效的token")
+            raise HTTPException(status_code=401, detail="鏃犳晥鐨則oken")
         
         result = await db.execute(select(User).where(User.user_id == user_id))
         user = result.scalar_one_or_none()
         if not user:
-            raise HTTPException(status_code=401, detail="用户不存在")
+            raise HTTPException(status_code=401, detail="鐢ㄦ埛涓嶅瓨鍦?)
         return user
     except JWTError:
-        raise HTTPException(status_code=401, detail="token验证失败")
+        raise HTTPException(status_code=401, detail="token楠岃瘉澶辫触")
 
 @router.post("/register", response_model=TokenResponse)
 async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.phone == user_data.phone))
     if result.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="手机号已注册")
+        raise HTTPException(status_code=400, detail="鎵嬫満鍙峰凡娉ㄥ唽")
     
     user = User(
         user_id=generate_id(),
@@ -84,7 +84,7 @@ async def login(login_data: UserLogin, db: AsyncSession = Depends(get_db)):
     user = result.scalar_one_or_none()
     
     if not user or not verify_password(login_data.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="手机号或密码错误")
+        raise HTTPException(status_code=401, detail="鎵嬫満鍙锋垨瀵嗙爜閿欒")
     
     return TokenResponse(access_token=create_token(user.user_id))
 
@@ -104,15 +104,15 @@ async def request_password_reset(
     reset_data: PasswordResetRequest,
     db: AsyncSession = Depends(get_db)
 ):
-    """请求密码重置（1小时内最多3次）"""
+    """璇锋眰瀵嗙爜閲嶇疆锛?灏忔椂鍐呮渶澶?娆★級"""
     result = await db.execute(select(User).where(User.email == reset_data.email))
     user = result.scalar_one_or_none()
     
     if not user:
-        logger.info(f"密码重置请求 - 邮箱不存在: {reset_data.email}")
-        return PasswordResetResponse(message="如果邮箱存在，重置链接已发送", success=True)
+        logger.info(f"瀵嗙爜閲嶇疆璇锋眰 - 閭涓嶅瓨鍦? {reset_data.email}")
+        return PasswordResetResponse(message="濡傛灉閭瀛樺湪锛岄噸缃摼鎺ュ凡鍙戦€?, success=True)
     
-    # 频率限制：1小时内最多3次
+    # 棰戠巼闄愬埗锛?灏忔椂鍐呮渶澶?娆?
     one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
     count_result = await db.execute(
         select(func.count(PasswordResetToken.token_id)).where(
@@ -124,7 +124,7 @@ async def request_password_reset(
     )
     request_count = count_result.scalar() or 0
     if request_count >= 3:
-        raise HTTPException(status_code=429, detail="请求过于频繁，请稍后再试（1小时内最多3次）")
+        raise HTTPException(status_code=429, detail="璇锋眰杩囦簬棰戠箒锛岃绋嶅悗鍐嶈瘯锛?灏忔椂鍐呮渶澶?娆★級")
     
     reset_token = secrets.token_urlsafe(32)
     expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
@@ -140,9 +140,9 @@ async def request_password_reset(
     await db.commit()
     
     reset_link = f"http://localhost:8000/reset-password?token={reset_token}"
-    logger.info(f"\n========== 密码重置邮件 (Mock) ==========\n收件人: {user.email}\n链接: {reset_link}\n========================================\n")
+    logger.info(f"\n========== 瀵嗙爜閲嶇疆閭欢 (Mock) ==========\n鏀朵欢浜? {user.email}\n閾炬帴: {reset_link}\n========================================\n")
     
-    return PasswordResetResponse(message="如果邮箱存在，重置链接已发送", success=True)
+    return PasswordResetResponse(message="濡傛灉閭瀛樺湪锛岄噸缃摼鎺ュ凡鍙戦€?, success=True)
 
 @router.post("/reset-password/{token}", response_model=PasswordResetResponse)
 async def confirm_password_reset(
@@ -150,7 +150,7 @@ async def confirm_password_reset(
     reset_data: PasswordResetConfirm,
     db: AsyncSession = Depends(get_db)
 ):
-    """确认密码重置"""
+    """纭瀵嗙爜閲嶇疆"""
     now_utc = datetime.now(timezone.utc)
     result = await db.execute(
         select(PasswordResetToken).where(
@@ -164,22 +164,22 @@ async def confirm_password_reset(
     token_record = result.scalar_one_or_none()
     
     if not token_record:
-        raise HTTPException(status_code=400, detail="重置链接无效或已过期")
+        raise HTTPException(status_code=400, detail="閲嶇疆閾炬帴鏃犳晥鎴栧凡杩囨湡")
     
     result = await db.execute(select(User).where(User.user_id == token_record.user_id))
     user = result.scalar_one_or_none()
     
     if not user:
-        raise HTTPException(status_code=404, detail="用户不存在")
+        raise HTTPException(status_code=404, detail="鐢ㄦ埛涓嶅瓨鍦?)
     
     user.password_hash = hash_password(reset_data.new_password)
     token_record.is_used = True
     token_record.used_at = now_utc
     
     await db.commit()
-    logger.info(f"密码重置成功 - 用户: {user.phone}")
+    logger.info(f"瀵嗙爜閲嶇疆鎴愬姛 - 鐢ㄦ埛: {user.phone}")
     
-    return PasswordResetResponse(message="密码已重置，请使用新密码登录", success=True)
+    return PasswordResetResponse(message="瀵嗙爜宸查噸缃紝璇蜂娇鐢ㄦ柊瀵嗙爜鐧诲綍", success=True)
 
 @router.post("/me/change-password")
 async def change_password(
@@ -188,27 +188,27 @@ async def change_password(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """修改密码"""
+    """淇敼瀵嗙爜"""
     if not verify_password(old_password, current_user.password_hash):
-        raise HTTPException(status_code=400, detail="旧密码不正确")
+        raise HTTPException(status_code=400, detail="鏃у瘑鐮佷笉姝ｇ‘")
     
     if len(new_password) < 8:
-        raise HTTPException(status_code=400, detail="密码至少8位，需包含字母和数字")
+        raise HTTPException(status_code=400, detail="瀵嗙爜鑷冲皯8浣嶏紝闇€鍖呭惈瀛楁瘝鍜屾暟瀛?)
     
     has_letter = any(c.isalpha() for c in new_password)
     has_digit = any(c.isdigit() for c in new_password)
     if not has_letter or not has_digit:
-        raise HTTPException(status_code=400, detail="密码必须包含字母和数字")
+        raise HTTPException(status_code=400, detail="瀵嗙爜蹇呴』鍖呭惈瀛楁瘝鍜屾暟瀛?)
     
     current_user.password_hash = hash_password(new_password)
     await db.commit()
     
-    logger.info(f"密码修改成功 - 用户: {current_user.phone}")
-    return {"message": "密码已修改", "success": True}
+    logger.info(f"瀵嗙爜淇敼鎴愬姛 - 鐢ㄦ埛: {current_user.phone}")
+    return {"message": "瀵嗙爜宸蹭慨鏀?, "success": True}
 
 @router.get("/profile", response_model=ProfileResponse)
 async def get_profile(current_user: User = Depends(get_current_user)):
-    """获取个人信息"""
+    """鑾峰彇涓汉淇℃伅"""
     return ProfileResponse(
         user_id=current_user.user_id,
         nickname=current_user.nickname,
@@ -226,7 +226,7 @@ async def update_profile(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """更新个人信息"""
+    """鏇存柊涓汉淇℃伅"""
     if profile_data.email:
         result = await db.execute(
             select(User).where(
@@ -234,7 +234,7 @@ async def update_profile(
             )
         )
         if result.scalar_one_or_none():
-            raise HTTPException(status_code=400, detail="邮箱已被使用")
+            raise HTTPException(status_code=400, detail="閭宸茶浣跨敤")
     
     if profile_data.phone:
         result = await db.execute(
@@ -243,7 +243,7 @@ async def update_profile(
             )
         )
         if result.scalar_one_or_none():
-            raise HTTPException(status_code=400, detail="手机号已被使用")
+            raise HTTPException(status_code=400, detail="鎵嬫満鍙峰凡琚娇鐢?)
     
     if profile_data.nickname is not None:
         current_user.nickname = profile_data.nickname
