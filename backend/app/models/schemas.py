@@ -174,3 +174,39 @@ class NotificationListResponse(BaseModel):
 
 class NotificationMarkRead(BaseModel):
     notification_ids: List[str]
+
+# Sprint 2: 推送通知
+
+# --- 推送设置 ---
+
+class PushSettingsResponse(BaseModel):
+    notification_email: bool = True
+    notification_browser: bool = True
+
+
+class PushSettingsUpdate(BaseModel):
+    notification_email: Optional[bool] = None
+    notification_browser: Optional[bool] = None
+
+
+# --- DND 设置 ---
+
+class DndSettingsResponse(BaseModel):
+    dnd_start: Optional[str] = None
+    dnd_end: Optional[str] = None
+
+
+class DndSettingsUpdate(BaseModel):
+    dnd_start: Optional[str] = None
+    dnd_end: Optional[str] = None
+
+
+# --- 推送结果 ---
+
+class PushDispatchResult(BaseModel):
+    event_id: str
+    email_sent: bool = False
+    in_app_created: bool = False
+    browser_notification: Optional[dict] = None
+    dnd_suppressed_browser: bool = False
+    dnd_suppressed_email: bool = False

@@ -19,6 +19,9 @@
         .health-trend-down { color: #dc3545; }
         .health-trend-stable { color: #6c757d; }
         .nav-icon { cursor: pointer; font-size: 24px; }
+        .notification-toast { position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 350px; }
+        .push-setting-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+        .push-setting-row label { margin-bottom: 0; }
     </style>
 </head>
 <body class="gradient-bg">
@@ -82,6 +85,7 @@
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <h5><span class="parrot-icon" style="font-size:24px;">🦜</span> ParrotCare AI</h5>
                     <div class="d-flex gap-3">
+                        <span class="nav-icon" id="settings-btn">⚙️</span>
                         <span class="nav-icon position-relative" id="notification-btn">🔔<span class="notification-badge" id="notification-badge" style="display:none;">0</span></span>
                         <span class="nav-icon" id="profile-btn">👤</span>
                         <span class="nav-icon" id="logout-btn">🚪</span>
@@ -175,6 +179,43 @@
         </div>
     </div>
 </div>
+
+<!-- Sprint 2: 推送设置面板 -->
+<div class="modal fade" id="settings-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">⚙️ 推送设置</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <h6>📬 推送通知开关</h6>
+                <div class="push-setting-row">
+                    <label>📧 邮件通知</label>
+                    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="setting-email"></div>
+                </div>
+                <div class="push-setting-row">
+                    <label>🌐 浏览器通知</label>
+                    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="setting-browser"></div>
+                </div>
+                <hr>
+                <h6>🌙 免打扰时段 (DND)</h6>
+                <div class="row">
+                    <div class="col-6"><label class="form-label">开始时间</label><input type="time" class="form-control" id="setting-dnd-start"></div>
+                    <div class="col-6"><label class="form-label">结束时间</label><input type="time" class="form-control" id="setting-dnd-end"></div>
+                </div>
+                <small class="text-muted">免打扰时段内，非紧急事件仅记录站内消息，不发送浏览器通知。紧急事件不受影响。</small>
+                <div class="mt-3"><button class="btn btn-sm btn-outline-danger" id="clear-dnd-btn">清除免打扰设置</button></div>
+                <hr>
+                <div class="mt-3">
+                    <button class="btn btn-sm btn-outline-primary" id="test-notification-btn">🧪 发送测试通知</button>
+                    <small class="text-muted ms-2">测试浏览器通知是否正常工作</small>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">关闭</button><button class="btn btn-primary" id="save-settings-btn">保存设置</button></div>
+        </div>
+    </div>
+</div>
+
+<!-- Sprint 2: 浏览器通知 Toast -->
+<div class="notification-toast" id="notification-toasts"></div>
 
 <!-- 添加鹦鹉弹窗 -->
 <div class="modal fade" id="add-parrot-modal" tabindex="-1">

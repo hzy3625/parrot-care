@@ -12,9 +12,10 @@ numpy>=1.24.0
 minio>=7.1.0
 aiofiles>=23.0.0
 python-dotenv>=1.0.0
-# ²âÊÔÒÀÀµ (Sprint 1)
+# æµ‹è¯•ä¾èµ– (Sprint 1)
 pytest>=7.4.0
 pytest-asyncio>=0.21.0
 httpx>=0.24.0
 aiosqlite>=0.19.0
-\n# ÓÊ¼þ·¢ËÍ (Sprint 1)\naiosmtplib>=2.0.0
+# é‚®ä»¶æ”¯æŒ (Sprint 1)
+aiosmtplib>=2.0.0

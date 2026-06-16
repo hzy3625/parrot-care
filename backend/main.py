@@ -11,6 +11,7 @@ import uvicorn
 from contextlib import asynccontextmanager
 
 from app.api import users, parrots, events, audio, notifications
+from app.api import settings as settings_api
 from app.config import settings
 from app.db import init_db
 
@@ -44,6 +45,8 @@ app.include_router(events.router, prefix="/api/events", tags=["事件"])
 app.include_router(audio.router, prefix="/api/audio", tags=["音频"])
 # Sprint 1: 站内消息
 app.include_router(notifications.router, prefix="/api/notifications", tags=["消息中心"])
+# Sprint 2: 推送通知设置
+app.include_router(settings_api.router, prefix="/api/settings", tags=["推送设置"])
 
 @app.get("/")
 async def root():
@@ -51,7 +54,7 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "features": ["password_reset", "notification_center", "health_overview", "profile_management"]}
+    return {"status": "ok", "features": ["password_reset", "notification_center", "health_overview", "profile_management", "push_notifications", "dnd_settings"]}
 
 if __name__ == "__main__":
     uvicorn.run(

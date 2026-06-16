@@ -451,6 +451,130 @@ function saveNotificationPreferences(emailNotify, browserNotify) {
     showAlert('通知偏好已保存', 'success');
 }
 
+// ==================== Sprint 2: 推送通知设置 ====================
+
+// 加载推送设置
+async function loadPushSettings() {
+    try {
+        const resp = await apiRequest('/settings/push', 'GET');
+        document.getElementById('setting-email').checked = resp.notification_email;
+        document.getElementById('setting-browser').checked = resp.notification_browser;
+        
+        const dnd = await apiRequest('/settings/dnd', 'GET');
+        document.getElementById('setting-dnd-start').value = dnd.dnd_start || '';
+        document.getElementById('setting-dnd-end').value = dnd.dnd_end || '';
+    } catch (error) {
+        console.error('加载推送设置失败:', error);
+    }
+}
+
+// 保存推送设置
+async function savePushSettings() {
+    try {
+        await apiRequest('/settings/push', 'PUT', {
+            notification_email: document.getElementById('setting-email').checked,
+            notification_browser: document.getElementById('setting-browser').checked,
+        });
+        
+        const dndStart = document.getElementById('setting-dnd-start').value;
+        const dndEnd = document.getElementById('setting-dnd-end').value;
+        await apiRequest('/settings/dnd', 'PUT', {
+            dnd_start: dndStart || null,
+            dnd_end: dndEnd || null,
+        });
+        
+        // 如果开启了浏览器通知，请求浏览器权限
+        if (document.getElementById('setting-browser').checked) {
+            await requestBrowserNotificationPermission();
+        }
+        
+        showAlert('推送设置已保存', 'success');
+    } catch (error) {
+        showAlert(`保存失败: ${error.message}`, 'danger');
+    }
+}
+
+// 清除 DND 设置
+async function clearDndSettings() {
+    try {
+        await apiRequest('/settings/dnd', 'PUT', { dnd_start: null, dnd_end: null });
+        document.getElementById('setting-dnd-start').value = '';
+        document.getElementById('setting-dnd-end').value = '';
+        showAlert('免打扰设置已清除', 'success');
+    } catch (error) {
+        showAlert(`清除失败: ${error.message}`, 'danger');
+    }
+}
+
+// 请求浏览器通知权限
+async function requestBrowserNotificationPermission() {
+    if (!('Notification' in window)) {
+        console.warn('浏览器不支持通知');
+        return false;
+    }
+    
+    if (Notification.permission === 'granted') {
+        return true;
+    }
+    
+    if (Notification.permission !== 'denied') {
+        const permission = await Notification.requestPermission();
+        return permission === 'granted';
+    }
+    
+    return false;
+}
+
+// 显示浏览器原生通知
+function showBrowserNotification(title, body, event_id) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+        return;
+    }
+    
+    const notification = new Notification(title, {
+        body: body,
+        icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦜</text></svg>',
+        tag: event_id,  // 去重
+        requireInteraction: true,
+    });
+    
+    notification.onclick = function() {
+        window.focus();
+        notification.close();
+    };
+}
+
+// 显示网页内 Toast 通知
+function showInAppToast(title, body, type = 'warning') {
+    const container = document.getElementById('notification-toasts');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} alert-dismissible fade show shadow mb-2`;
+    toast.innerHTML = `
+        <strong>${title}</strong><br>${body}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    container.appendChild(toast);
+    
+    // 10 秒后自动移除
+    setTimeout(() => {
+        if (toast.parentNode) toast.remove();
+    }, 10000);
+}
+
+// 发送测试通知
+function sendTestNotification() {
+    const title = '🦜 ParrotCare 测试通知';
+    const body = '这是一条测试通知，说明浏览器通知功能正常工作！';
+    
+    // 尝试浏览器原生通知
+    showBrowserNotification(title, body, 'test-' + Date.now());
+    
+    // 同时显示网页内 Toast
+    showInAppToast('测试通知', '浏览器通知已发送，请检查系统通知栏', 'success');
+}
+
 // ==================== 页面切换逻辑 ====================
 function showLoginPage() {
     hideAllPages();
@@ -684,6 +808,45 @@ document.addEventListener('DOMContentLoaded', function() {
         healthOverviewBtn.addEventListener('click', async function() {
             document.getElementById('health-overview-card').style.display = 'block';
             await loadAllHealthOverview();
+        });
+    }
+    
+    // Sprint 2: 推送设置按钮
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', async function() {
+            const modal = new bootstrap.Modal(document.getElementById('settings-modal'));
+            modal.show();
+            await loadPushSettings();
+        });
+    }
+    
+    // Sprint 2: 保存设置按钮
+    const saveSettingsBtn = document.getElementById('save-settings-btn');
+    if (saveSettingsBtn) {
+        saveSettingsBtn.addEventListener('click', async function() {
+            await savePushSettings();
+        });
+    }
+    
+    // Sprint 2: 清除 DND 按钮
+    const clearDndBtn = document.getElementById('clear-dnd-btn');
+    if (clearDndBtn) {
+        clearDndBtn.addEventListener('click', async function() {
+            await clearDndSettings();
+        });
+    }
+    
+    // Sprint 2: 测试通知按钮
+    const testNotificationBtn = document.getElementById('test-notification-btn');
+    if (testNotificationBtn) {
+        testNotificationBtn.addEventListener('click', async function() {
+            const granted = await requestBrowserNotificationPermission();
+            if (granted) {
+                sendTestNotification();
+            } else {
+                showAlert('请先允许浏览器通知权限', 'warning');
+            }
         });
     }
     

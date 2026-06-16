@@ -15,6 +15,7 @@ from app.api.users import get_current_user, User
 from app.config import settings
 from app.db import get_db
 from app.services.audio_classifier import classify_audio
+from app.services.push_notification_service import get_push_service
 
 router = APIRouter()
 
@@ -61,11 +62,19 @@ async def upload_audio(
     )
     db.add(event)
     await db.commit()
+    await db.refresh(event)
     
     # 生成建议
     suggestion = None
     if is_abnormal:
         suggestion = generate_suggestion(event_type, risk_level)
+        # Sprint 2: 触发推送通知
+        try:
+            push_service = get_push_service()
+            await push_service.dispatch_for_event(event, db)
+        except Exception as e:
+            # 推送失败不应影响主流程
+            pass
     
     return EventResponse(
         event_id=event.event_id,
