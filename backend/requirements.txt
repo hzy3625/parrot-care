@@ -19,3 +19,6 @@ httpx>=0.24.0
 aiosqlite>=0.19.0
 # 邮件支持 (Sprint 1)
 aiosmtplib>=2.0.0
+# 迁移工具（SQLite → PostgreSQL）
+psycopg2-binary>=2.9.0
+alembic>=1.13.0

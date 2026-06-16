@@ -33,3 +33,13 @@ Thumbs.db
 # Env
 .env
 .env.local
+
+# AI Models
+backend/models/*.pt
+
+# Media
+backend/media/*
+!backend/media/.gitkeep
+
+# Alembic (迁移脚本保留，版本文件保留)
+backend/alembic/versions/*.pyc

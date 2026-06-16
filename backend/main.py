@@ -13,14 +13,15 @@ from contextlib import asynccontextmanager
 from app.api import users, parrots, events, audio, notifications
 from app.api import settings as settings_api
 from app.config import settings
-from app.db import init_db
+from app.db import init_db, close_db
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 启动时初始化数据库
     await init_db()
     yield
-    # 关闭时清理
+    # 关闭时清理连接池
+    await close_db()
 
 app = FastAPI(
     title="ParrotCare AI",
