@@ -4,7 +4,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, desc
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from typing import List
 from collections import defaultdict
 
@@ -232,7 +232,7 @@ async def get_health_overview(
     if not recommendations:
         recommendations.append("继续保持良好的养护习惯")
     
-    last_check = stats_7days[0].stat_date if stats_7days else datetime.utcnow()
+    last_check = stats_7days[0].stat_date if stats_7days else datetime.now(timezone.utc)
     
     return HealthOverview(
         parrot_id=parrot_id,

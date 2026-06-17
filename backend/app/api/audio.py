@@ -5,7 +5,7 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from datetime import datetime
+from datetime import datetime, timezone
 import aiofiles
 import os
 
@@ -52,7 +52,7 @@ async def upload_audio(
     event = MediaEvent(
         event_id=generate_id(),
         parrot_id=parrot_id,
-        event_time=datetime.utcnow(),
+        event_time=datetime.now(timezone.utc),
         event_type=event_type,
         media_type="audio",
         audio_url=audio_path,

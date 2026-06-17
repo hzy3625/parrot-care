@@ -4,7 +4,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, desc
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from app.models.database import Notification, generate_id
@@ -126,7 +126,7 @@ async def mark_notifications_read(
     if not mark_data.notification_ids:
         raise HTTPException(status_code=400, detail="消息ID列表不能为空")
     
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     query = select(Notification).where(
         and_(
             Notification.notification_id.in_(mark_data.notification_ids),
@@ -166,7 +166,7 @@ async def mark_single_read(
     
     if not notification.is_read:
         notification.is_read = True
-        notification.read_at = datetime.utcnow()
+        notification.read_at = datetime.now(timezone.utc)
         await db.commit()
         await db.refresh(notification)
     

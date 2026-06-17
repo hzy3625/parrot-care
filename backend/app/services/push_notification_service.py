@@ -2,7 +2,7 @@
 """推送通知服务 - 异常事件触发邮件 + 站内消息 + 浏览器通知"""
 
 import logging
-from datetime import datetime, time
+from datetime import datetime, time, timezone
 from typing import Optional, List
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -62,7 +62,7 @@ class PushNotificationService:
             return False
         
         if check_time is None:
-            check_time = datetime.utcnow()
+            check_time = datetime.now(timezone.utc)
         
         current = check_time.time()
         
@@ -118,7 +118,7 @@ class PushNotificationService:
             logger.warning(f"事件 {event.event_id} 关联的用户不存在")
             return result
         
-        check_time = event_time or event.event_time or datetime.utcnow()
+        check_time = event_time or event.event_time or datetime.now(timezone.utc)
         in_dnd = self.is_in_dnd(user.dnd_start, user.dnd_end, check_time)
         is_critical = (event.risk_level or "").lower() == "critical"
         
@@ -266,7 +266,7 @@ class PushNotificationService:
             <p style="margin-top: 20px;">请登录 ParrotCare 平台查看详情。</p>
         </div>
         <div class="footer">
-            <p>© {datetime.utcnow().year} ParrotCare - 智能鹦鹉健康管理平台</p>
+            <p>© {datetime.now(timezone.utc).year} ParrotCare - 智能鹦鹉健康管理平台</p>
             <p>此邮件由系统自动发送，请勿回复</p>
         </div>
     </div>

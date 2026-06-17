@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, Integer, Boolean, Float, DateTime, ForeignKey, Text, DECIMAL, Time
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 from passlib.context import CryptContext
 
@@ -30,7 +30,7 @@ class User(Base):
     dnd_start = Column(Time, nullable=True)  # Do Not Disturb 开始时间
     dnd_end = Column(Time, nullable=True)    # Do Not Disturb 结束时间
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     
     parrots = relationship("Parrot", back_populates="user")
     devices = relationship("Device", back_populates="user")
@@ -47,7 +47,7 @@ class Parrot(Base):
     weight = Column(DECIMAL(6, 2))
     has_plucking_history = Column(Boolean, default=False)
     has_night_fright_history = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     
     user = relationship("User", back_populates="parrots")
     events = relationship("MediaEvent", back_populates="parrot")
@@ -61,7 +61,7 @@ class Device(Base):
     device_name = Column(String(100))
     status = Column(String(30), default="offline")
     last_online_time = Column(DateTime)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     
     user = relationship("User", back_populates="devices")
 
@@ -80,7 +80,7 @@ class MediaEvent(Base):
     confidence = Column(DECIMAL(5, 4))
     is_abnormal = Column(Boolean, default=False)
     risk_level = Column(String(30))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     
     parrot = relationship("Parrot", back_populates="events")
     feedbacks = relationship("UserFeedback", back_populates="event")
@@ -94,7 +94,7 @@ class UserFeedback(Base):
     feedback_type = Column(String(50))
     feedback_label = Column(String(100))
     comment = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     
     event = relationship("MediaEvent", back_populates="feedbacks")
 
@@ -128,7 +128,7 @@ class Notification(Base):
     # Sprint 1 新增字段
     expires_at = Column(DateTime, nullable=True)  # 消息过期时间
     
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
     read_at = Column(DateTime, nullable=True)
 
 # Sprint 1: 密码重置 Token 表
@@ -141,7 +141,7 @@ class PasswordResetToken(Base):
     email = Column(String(100))
     expires_at = Column(DateTime)
     is_used = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     used_at = Column(DateTime, nullable=True)
 
 # Sprint 1: 密码重置频率限制表
@@ -150,4 +150,4 @@ class PasswordResetRateLimit(Base):
     
     limit_id = Column(String(64), primary_key=True, default=generate_id)
     email = Column(String(100), index=True)
-    request_time = Column(DateTime, default=datetime.utcnow)
+    request_time = Column(DateTime, default=lambda: datetime.now(timezone.utc))
