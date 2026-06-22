@@ -22,6 +22,58 @@
         .notification-toast { position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 350px; }
         .push-setting-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
         .push-setting-row label { margin-bottom: 0; }
+        
+        /* 手机适配（≤768px） */
+        @media (max-width: 768px) {
+            /* 全局调整 */
+            .gradient-bg { padding-bottom: 20px; }
+            
+            /* 导航栏紧凑显示 */
+            #home-page .card-body.d-flex { flex-wrap: wrap; padding: 12px; }
+            #home-page .card-body h5 { font-size: 18px; }
+            #home-page .d-flex.gap-3 { gap: 12px; margin-top: 8px; }
+            .nav-icon { font-size: 20px; }
+            
+            /* 卡片间距优化 */
+            .card.card-hover { margin-bottom: 16px; }
+            .card-header h5 { font-size: 16px; }
+            
+            /* 今日状态卡片 - 数据显示紧凑 */
+            #health-score, #chirp-count, #scream-count { font-size: 32px; }
+            
+            /* 健康档案总览 - 纵向堆叠 */
+            #health-overview-card .row .col-md-6 { width: 100%; margin-bottom: 16px; }
+            #health-overview-card .row.text-center .col-4 { width: 50%; }
+            #health-overview-card .display-6 { font-size: 28px; }
+            
+            /* 鹦鹉档案列表 - 单列显示 */
+            #parrots-list .card { width: 100%; margin-right: 0; }
+            
+            /* 音频上传 - 移动端优化 */
+            #audio-file { font-size: 14px; }
+            #upload-audio-btn { width: 100%; margin-top: 12px; }
+            select.form-select { font-size: 16px; } /* 避免 iOS zoom */
+            
+            /* 异常事件列表 */
+            #events-list .list-group-item { padding: 12px; }
+            #events-list .d-flex.justify-content-between { flex-wrap: wrap; }
+            #events-list .btn-group { margin-top: 8px; }
+            
+            /* 模态框优化 */
+            .modal-dialog { margin: 10px; }
+            .modal-body { padding: 16px; }
+            .modal-footer { padding: 12px; }
+            
+            /* 推送设置 - 时间输入纵向 */
+            .modal-body .row .col-6 { width: 100%; margin-bottom: 12px; }
+            
+            /* 按钮 - 全宽显示 */
+            #record-btn { font-size: 16px; padding: 12px; }
+            #add-parrot-btn, #health-overview-btn { width: 100%; margin-left: 0; margin-top: 12px; }
+            
+            /* Toast 通知位置 */
+            .notification-toast { top: 10px; right: 10px; max-width: 280px; }
+        }
     </style>
 </head>
 <body class="gradient-bg">

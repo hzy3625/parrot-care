@@ -44,6 +44,8 @@
   gap: 20px;
 }
 
+/* REQ-022: 手机端强制单列，防止横向滚动 */
+
 .event-card {
   background: white;
   border-radius: 12px;
@@ -113,36 +115,75 @@
   font-size: 0.85rem;
 }
 
-/* REQ-022: 响应式适配 - 平板端 */
+/* REQ-022: 响应式适配 - 手机端 (≤768px) */
 @media (max-width: 768px) {
+  .home-page {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
   .page-header {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
   }
 
   .page-header h2 {
     font-size: 1.3rem;
+    text-align: center;
   }
 
   .upload-btn {
     width: 100%;
-    padding: 14px 24px;
-    font-size: 1rem;
+    padding: 16px 24px;
+    font-size: 1.1rem;
+    font-weight: 600;
   }
 
   .events-grid {
     grid-template-columns: 1fr;
-    gap: 15px;
+    gap: 12px;
+    padding: 0 5px;
   }
 
   .event-card {
     padding: 16px;
+    border-radius: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .event-header {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
   }
 
   .event-type {
     font-size: 1rem;
   }
+
+  .severity-badge {
+    padding: 5px 10px;
+    font-size: 0.7rem;
+  }
+
+  .detail-row {
+    font-size: 0.9rem;
+  }
+
+  .status-badge {
+    padding: 3px 8px;
+    font-size: 0.8rem;
+  }
+
+  .touch-friendly {
+    min-height: 48px;
+    min-width: 48px;
+  }
 }
+
+/* REQ-022: 响应式适配 - 平板端 (769-1024px) */
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .page-header h2 {
@@ -165,6 +206,7 @@
 
   .touch-friendly {
     min-height: 48px;
+    min-width: 48px;
     padding: 14px 22px;
   }
 }

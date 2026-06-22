@@ -2,6 +2,7 @@
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
+  overflow-x: hidden;
 }
 
 .back-link {
@@ -284,74 +285,148 @@ section h3 {
   min-width: 44px;
 }
 
-/* REQ-022: 响应式适配 - 平板端和移动端 */
+/* REQ-022: 响应式适配 - 手机端 (≤768px) */
 @media (max-width: 768px) {
+  .detail-page {
+    width: 100%;
+    overflow-x: hidden;
+    padding: 0 5px;
+  }
+
+  .back-link a {
+    padding: 12px 15px;
+    font-size: 1rem;
+  }
+
   .detail-container {
-    padding: 20px;
+    padding: 16px;
     border-radius: 12px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .detail-title {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
   }
 
   .detail-title h2 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    text-align: center;
   }
 
   .severity-badge.large {
     padding: 8px 16px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     text-align: center;
+    width: 100%;
   }
 
   .detail-stats {
     grid-template-columns: 1fr;
-    gap: 15px;
+    gap: 12px;
+  }
+
+  .stat-item {
+    padding: 8px 0;
   }
 
   section h3 {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
+    padding-bottom: 6px;
+  }
+
+  section {
+    margin-bottom: 20px;
+  }
+
+  /* 音频播放器 - 移动端优化 */
+  .audio-player {
+    padding: 16px;
+    border-radius: 10px;
   }
 
   .play-btn {
     width: 100%;
     justify-content: center;
-    padding: 16px 28px;
-    font-size: 1rem;
+    padding: 18px 28px;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .audio-progress {
+    margin-top: 12px;
+  }
+
+  .progress-slider {
+    height: 8px;
+  }
+
+  .time-display {
+    font-size: 0.85rem;
   }
 
   .audio-controls {
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
   }
 
   .control-btn {
     width: 100%;
-    padding: 12px 16px;
-    font-size: 0.95rem;
+    padding: 14px 16px;
+    font-size: 1rem;
+    font-weight: 500;
   }
 
+  /* 事件标记 - 移动端优化 */
   .status-options {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
 
   .status-btn {
-    padding: 14px 18px;
+    padding: 16px 18px;
     font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .current-status {
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  /* 备注记录 - 移动端优化 */
+  .notes-list {
+    gap: 12px;
+  }
+
+  .note-item {
+    padding: 12px;
+    border-radius: 6px;
+  }
+
+  .note-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .note-content {
+    font-size: 0.9rem;
   }
 
   .note-input {
     padding: 14px;
     font-size: 1rem;
+    border-radius: 8px;
   }
 
   .add-note-btn {
     width: 100%;
-    padding: 14px 24px;
-    font-size: 1rem;
+    padding: 16px 24px;
+    font-size: 1.05rem;
+    font-weight: 600;
   }
 
   .touch-friendly {
