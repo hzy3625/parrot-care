@@ -16,6 +16,7 @@ from app.config import settings
 from app.db import get_db
 from app.services.audio_classifier import classify_audio
 from app.services.push_notification_service import get_push_service
+from app.api.websocket import push_event
 
 router = APIRouter()
 
@@ -74,6 +75,22 @@ async def upload_audio(
             await push_service.dispatch_for_event(event, db)
         except Exception as e:
             # 推送失败不应影响主流程
+            pass
+        
+        # Sprint 3 REQ-016: WebSocket 实时推送
+        try:
+            await push_event({
+                'event_id': event.event_id,
+                'parrot_id': parrot_id,
+                'parrot_name': parrot.name,
+                'event_type': event_type,
+                'risk_level': risk_level,
+                'confidence': confidence,
+                'timestamp': event.event_time.isoformat(),
+                'is_abnormal': is_abnormal
+            })
+        except Exception as e:
+            # WebSocket 推送失败不应影响主流程
             pass
     
     return EventResponse(

@@ -634,6 +634,7 @@ async function loadParrotsList() {
         
         if (parrots.length === 0) {
             listDiv.innerHTML = '<div class="text-muted">暂无鹦鹉，请添加</div>';
+            populateAudioParrotSelect([]);
             return;
         }
         
@@ -650,8 +651,204 @@ async function loadParrotsList() {
             `;
             listDiv.appendChild(item);
         });
+
+        populateAudioParrotSelect(parrots);
     } catch (error) {
         console.error('加载鹦鹉列表失败:', error);
+    }
+}
+
+// ==================== 音频上传（REQ-015 / AC-015-7） ====================
+const EVENT_TYPE_LABELS = {
+    normal_chirp: '正常鸣叫',
+    night_fright: '夜惊',
+    night_scream: '夜间尖叫',
+    high_frequency_scream: '高频尖叫',
+    violent_flapping: '剧烈扑翅',
+    cage_collision: '撞笼',
+    unknown: '未知'
+};
+
+const RISK_LEVEL_LABELS = {
+    critical: '严重',
+    high: '高',
+    medium: '中',
+    low: '低'
+};
+
+function formatEventType(eventType) {
+    return EVENT_TYPE_LABELS[eventType] || eventType;
+}
+
+function formatRiskLevel(riskLevel) {
+    if (!riskLevel) return '无';
+    return RISK_LEVEL_LABELS[riskLevel] || riskLevel;
+}
+
+function populateAudioParrotSelect(parrots) {
+    const select = document.getElementById('audio-parrot-select');
+    if (!select) return;
+
+    select.innerHTML = '';
+
+    if (parrots.length === 0) {
+        select.innerHTML = '<option value="">请先添加鹦鹉</option>';
+        return;
+    }
+
+    parrots.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p.parrot_id;
+        option.textContent = `${p.name}（${p.species}）`;
+        select.appendChild(option);
+    });
+
+    if (currentParrotId && parrots.some(p => p.parrot_id === currentParrotId)) {
+        select.value = currentParrotId;
+    }
+}
+
+function updateUploadProgress(percent) {
+    const progressDiv = document.getElementById('upload-progress');
+    const progressBar = document.getElementById('upload-progress-bar');
+    if (!progressDiv || !progressBar) return;
+
+    progressDiv.style.display = 'block';
+    progressBar.style.width = `${percent}%`;
+    progressBar.textContent = `${percent}%`;
+}
+
+function hideUploadProgress() {
+    const progressDiv = document.getElementById('upload-progress');
+    const progressBar = document.getElementById('upload-progress-bar');
+    if (!progressDiv || !progressBar) return;
+
+    progressDiv.style.display = 'none';
+    progressBar.style.width = '0%';
+    progressBar.textContent = '0%';
+}
+
+function renderAudioResult(result) {
+    const resultDiv = document.getElementById('audio-result');
+    if (!resultDiv) return;
+
+    const riskBadgeClass = {
+        critical: 'danger',
+        high: 'warning',
+        medium: 'info',
+        low: 'secondary'
+    }[result.risk_level] || 'success';
+
+    const confidence = result.confidence != null
+        ? `${(Number(result.confidence) * 100).toFixed(1)}%`
+        : '-';
+
+    const alertClass = result.is_abnormal ? 'warning' : 'success';
+
+    resultDiv.innerHTML = `
+        <div class="alert alert-${alertClass} mb-0">
+            <h6 class="alert-heading">分析结果</h6>
+            <p class="mb-1"><strong>分类：</strong>${formatEventType(result.event_type)}</p>
+            <p class="mb-1"><strong>置信度：</strong>${confidence}</p>
+            <p class="mb-1"><strong>风险等级：</strong>
+                <span class="badge bg-${riskBadgeClass}">${formatRiskLevel(result.risk_level)}</span>
+            </p>
+            ${result.suggestion ? `<p class="mb-1"><strong>建议：</strong>${result.suggestion}</p>` : ''}
+            <small class="text-muted">事件 ID: ${result.event_id}</small>
+        </div>
+    `;
+    resultDiv.style.display = 'block';
+}
+
+async function uploadAudio(parrotId, file) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        const formData = new FormData();
+        formData.append('parrot_id', parrotId);
+        formData.append('audio_file', file);
+
+        xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+                const percent = Math.round((e.loaded / e.total) * 100);
+                updateUploadProgress(percent);
+            }
+        });
+
+        xhr.addEventListener('load', () => {
+            let data;
+            try {
+                data = JSON.parse(xhr.responseText);
+            } catch (e) {
+                reject(new Error('解析响应失败'));
+                return;
+            }
+
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve(data);
+            } else {
+                const detail = data.detail;
+                const message = typeof detail === 'string'
+                    ? detail
+                    : Array.isArray(detail)
+                        ? detail.map(d => d.msg || d).join('; ')
+                        : '上传失败';
+                reject(new Error(message));
+            }
+        });
+
+        xhr.addEventListener('error', () => reject(new Error('网络错误，请检查后端服务是否启动')));
+        xhr.addEventListener('abort', () => reject(new Error('上传已取消')));
+
+        xhr.open('POST', `${API_BASE_URL}/audio/upload`);
+        if (currentToken) {
+            xhr.setRequestHeader('Authorization', `Bearer ${currentToken}`);
+        }
+        xhr.send(formData);
+    });
+}
+
+async function handleAudioUpload() {
+    const parrotId = document.getElementById('audio-parrot-select')?.value;
+    const fileInput = document.getElementById('audio-file');
+    const file = fileInput?.files?.[0];
+    const uploadBtn = document.getElementById('upload-audio-btn');
+    const resultDiv = document.getElementById('audio-result');
+
+    if (!parrotId) {
+        showAlert('请先选择鹦鹉', 'warning');
+        return;
+    }
+    if (!file) {
+        showAlert('请选择音频文件', 'warning');
+        return;
+    }
+
+    const allowedExtensions = ['.wav', '.mp3', '.ogg'];
+    const fileName = file.name.toLowerCase();
+    if (!allowedExtensions.some(ext => fileName.endsWith(ext))) {
+        showAlert('仅支持 .wav、.mp3、.ogg 格式', 'warning');
+        return;
+    }
+
+    if (uploadBtn) uploadBtn.disabled = true;
+    if (resultDiv) resultDiv.style.display = 'none';
+    updateUploadProgress(0);
+
+    try {
+        const result = await uploadAudio(parrotId, file);
+        updateUploadProgress(100);
+        renderAudioResult(result);
+        showAlert('音频分析完成', 'success');
+
+        if (currentParrotId === parrotId) {
+            await loadTodaySummary(parrotId);
+        }
+    } catch (error) {
+        hideUploadProgress();
+        showAlert(`上传失败: ${error.message}`, 'danger');
+    } finally {
+        if (uploadBtn) uploadBtn.disabled = false;
+        setTimeout(hideUploadProgress, 800);
     }
 }
 
@@ -659,6 +856,11 @@ async function loadParrotsList() {
 function selectParrot(parrotId, parrotName) {
     currentParrotId = parrotId;
     document.getElementById('parrot-name').textContent = parrotName;
+
+    const audioSelect = document.getElementById('audio-parrot-select');
+    if (audioSelect) {
+        audioSelect.value = parrotId;
+    }
     
     // 加载今日摘要
     loadTodaySummary(parrotId);
@@ -850,6 +1052,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // 音频上传按钮
+    const uploadAudioBtn = document.getElementById('upload-audio-btn');
+    if (uploadAudioBtn) {
+        uploadAudioBtn.addEventListener('click', handleAudioUpload);
+    }
+
     // 检查URL中是否有密码重置token
     const urlParams = new URLSearchParams(window.location.search);
     const resetToken = urlParams.get('token');
@@ -858,7 +1066,81 @@ document.addEventListener('DOMContentLoaded', function() {
         // 显示确认重置表单
         // TODO: 实现确认重置UI
     }
+    
+    // Sprint 3: 启动 WebSocket 实时推送
+    connectWebSocket();
 });
+
+// ==================== WebSocket 实时推送 (Sprint 3 REQ-016) ====================
+let ws = null;
+
+function connectWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.hostname;
+    const port = '8000'; // 后端端口
+    ws = new WebSocket(`${protocol}//${host}:${port}/ws/events`);
+    
+    ws.onopen = () => {
+        console.log('WebSocket connected');
+        // 心跳保持
+        setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send('ping');
+            }
+        }, 30000);
+    };
+    
+    ws.onmessage = (event) => {
+        try {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'event') {
+                handleRealtimeEvent(msg.data);
+            }
+        } catch (e) {
+            // pong 响应，忽略
+        }
+    };
+    
+    ws.onerror = (err) => console.error('WebSocket error:', err);
+    ws.onclose = () => {
+        console.log('WebSocket disconnected, reconnecting in 5s...');
+        setTimeout(connectWebSocket, 5000);
+    };
+}
+
+function handleRealtimeEvent(event) {
+    // 显示实时事件通知
+    const eventLabels = {
+        'abnormal_sound': '异常叫声',
+        'scream': '尖叫',
+        'night_fright': '夜间惊飞',
+        'plucking': '啄羽',
+        'silence': '长时间安静'
+    };
+    const riskLabels = {
+        'high': '高风险',
+        'critical': '紧急',
+        'medium': '中等风险',
+        'low': '低风险'
+    };
+    
+    const eventType = eventLabels[event.event_type] || event.event_type;
+    const riskLevel = riskLabels[event.risk_level] || event.risk_level;
+    
+    showBrowserNotification(
+        `🦜 ${event.parrot_name} - ${eventType}`,
+        { body: `风险等级: ${riskLevel} | 时间: ${new Date(event.timestamp).toLocaleString()}` }
+    );
+    
+    // 刷新事件列表和今日摘要
+    if (currentParrotId === event.parrot_id) {
+        loadTodaySummary(currentParrotId);
+        loadParrotEvents(currentParrotId);
+    }
+    
+    // 显示页面提示
+    showAlert(`${event.parrot_name} 检测到 ${eventType}，${riskLevel}`, 'warning');
+}
 
 // ==================== 导出全局函数（供HTML调用） ====================
 window.markNotificationRead = markNotificationRead;
