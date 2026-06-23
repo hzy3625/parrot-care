@@ -1,45 +1,8 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-*.egg-info/
+node_modules/
 dist/
-build/
-
-# Database
-*.db
-*.sqlite3
-
-# Events log
-events.json
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Env
+__pycache__/
+*.pyc
 .env
-.env.local
-
-# AI Models
-backend/models/*.pt
-
-# Media
-backend/media/*
-!backend/media/.gitkeep
-
-# Alembic (迁移脚本保留，版本文件保留)
-backend/alembic/versions/*.pyc
+data/synthetic/
+models/*.pt
+.venv/
