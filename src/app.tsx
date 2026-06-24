@@ -1,7 +1,8 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import HomePage from './pages/HomePage'
-import AnomalyDetailPage from './pages/AnomalyDetailPage'
+import HomePage from './pages/homepage'
+import AnomalyDetailPage from './pages/anomalydetailpage'
+import RecordPage from './pages/recordpage'
 import './App.css'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/anomaly/:id" element={<AnomalyDetailPage />} />
+            <Route path="/record" element={<RecordPage />} />
           </Routes>
         </main>
       </div>

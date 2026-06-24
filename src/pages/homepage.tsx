@@ -59,9 +59,14 @@ function HomePage() {
     <div className="home-page">
       <div className="page-header">
         <h2>异常事件列表</h2>
-        <button className="upload-btn touch-friendly">
-          📤 上传音频
-        </button>
+        <div className="header-actions">
+          <Link to="/record" className="upload-btn touch-friendly">
+            🎙️ 录音采集
+          </Link>
+          <button className="upload-btn touch-friendly">
+            📤 上传音频
+          </button>
+        </div>
       </div>
 
       <div className="events-grid">

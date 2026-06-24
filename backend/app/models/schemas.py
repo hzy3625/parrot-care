@@ -1,6 +1,6 @@
 ﻿from pydantic import BaseModel, EmailStr, field_validator
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Dict
 from decimal import Decimal
 
 # 用户
@@ -203,6 +203,7 @@ class DndSettingsUpdate(BaseModel):
 
 # --- 推送结果 ---
 
+
 class PushDispatchResult(BaseModel):
     event_id: str
     email_sent: bool = False
@@ -210,3 +211,27 @@ class PushDispatchResult(BaseModel):
     browser_notification: Optional[dict] = None
     dnd_suppressed_browser: bool = False
     dnd_suppressed_email: bool = False
+
+
+# REQ-019a: 录音标注上传
+
+
+class RecordUploadResponse(BaseModel):
+    event_id: str
+    event_type: str
+    saved: bool
+    message: str
+
+
+class CollectionProgressItem(BaseModel):
+    event_type: str
+    label_cn: str
+    label_en: str
+    count: int
+    target: int
+
+
+class CollectionProgressResponse(BaseModel):
+    categories: List[CollectionProgressItem]
+    total_count: int
+    total_target: int
