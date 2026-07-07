@@ -10,6 +10,7 @@
 | `development.md` | 搭建环境、启动服务和使用统一命令 |
 | `testing/verification.md` | 决定改动需要运行哪些检查 |
 | `requirements/data-collection-plan.md` | 处理音频数据采集计划 |
+| `requirements/mobile-basic-features.md` | 开发 Android 本地录音、记录管理和备份功能 |
 | `requirements/req-019-data-collection-prep.md` | 修改训练数据准备流程 |
 | `requirements/req-019-xenocanto-evaluation.md` | 使用 Xeno-Canto 数据工具 |
 
