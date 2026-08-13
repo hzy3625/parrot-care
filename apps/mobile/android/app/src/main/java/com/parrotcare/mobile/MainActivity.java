@@ -10,6 +10,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -42,6 +44,8 @@ public final class MainActivity extends Activity {
     private static final int IMPORT_BACKUP_REQUEST = 102;
     private static final String PREFS = "parrotcare";
     private static final String PREF_CURRENT_PARROT = "current_parrot_id";
+    private static final long MIN_AUDIO_BYTES = 1024L;
+    private static final long MIN_AUDIO_DURATION_MS = 800L;
 
     private static final Choice[] CATEGORIES = new Choice[]{
         new Choice("normal_chirp", "正常鸣叫"),
@@ -72,6 +76,19 @@ public final class MainActivity extends Activity {
     private ScrollView currentScrollView;
     private File pendingAudio;
     private long recordingStartedAt;
+    private final Handler uiHandler = new Handler(Looper.getMainLooper());
+    private TextView recordingTimerText;
+    private final Runnable recordingTimer = new Runnable() {
+        @Override
+        public void run() {
+            if (!recorder.isRecording() || recordingTimerText == null) {
+                return;
+            }
+            long duration = System.currentTimeMillis() - recordingStartedAt;
+            recordingTimerText.setText("已录制：" + formatDuration(duration));
+            uiHandler.postDelayed(this, 500L);
+        }
+    };
     private String filterParrot = "all";
     private String filterCategory = "all";
     private String filterPurpose = "all";
@@ -194,15 +211,21 @@ public final class MainActivity extends Activity {
     private void showRecording() {
         LinearLayout root = base("正在录音");
         root.addView(note("录音中。停止后可试听，再决定是否保存。"));
+        recordingTimerText = section("已录制：0分0秒");
+        root.addView(recordingTimerText);
         root.addView(primaryButton("停止录音", v -> stopRecording()));
         root.addView(secondaryButton("取消录音", v -> cancelRecording()));
         setRoot(root, 0);
+        uiHandler.removeCallbacks(recordingTimer);
+        uiHandler.post(recordingTimer);
     }
 
     private void stopRecording() {
+        uiHandler.removeCallbacks(recordingTimer);
+        recordingTimerText = null;
         File audio = recorder.stop();
         long duration = System.currentTimeMillis() - recordingStartedAt;
-        if (audio == null || !audio.exists() || audio.length() <= 0 || duration < 800L) {
+        if (audio == null || !audio.exists() || audio.length() < MIN_AUDIO_BYTES || duration < MIN_AUDIO_DURATION_MS) {
             files.deleteQuietly(audio);
             pendingAudio = null;
             toast("录音太短或无效，未保存");
@@ -215,6 +238,8 @@ public final class MainActivity extends Activity {
     }
 
     private void cancelRecording() {
+        uiHandler.removeCallbacks(recordingTimer);
+        recordingTimerText = null;
         if (recorder.isRecording()) {
             recorder.cancel();
         }
@@ -460,6 +485,11 @@ public final class MainActivity extends Activity {
             try {
                 File audio = files.copyFromUri(uri);
                 long duration = files.durationMs(audio);
+                if (audio.length() < MIN_AUDIO_BYTES || duration < MIN_AUDIO_DURATION_MS) {
+                    files.deleteQuietly(audio);
+                    toast("导入音频太短或无法识别，未保存");
+                    return;
+                }
                 showSaveEvent(audio, "import", duration, "abnormal");
             } catch (IOException error) {
                 toast("导入音频失败：" + error.getMessage());
@@ -471,6 +501,8 @@ public final class MainActivity extends Activity {
 
     @Override
     protected void onStop() {
+        uiHandler.removeCallbacks(recordingTimer);
+        recordingTimerText = null;
         if (recorder.isRecording()) {
             recorder.cancel();
             files.deleteQuietly(pendingAudio);
@@ -481,6 +513,7 @@ public final class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        uiHandler.removeCallbacks(recordingTimer);
         player.stop();
         store.close();
         super.onDestroy();
