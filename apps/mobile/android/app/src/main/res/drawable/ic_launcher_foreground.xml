@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Sound waves: the app listens for changes, it does not continuously monitor. -->
+    <path
+        android:pathData="M25,43 C18,49 18,59 25,65"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#BDEBD5"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M17,36 C6,46 6,66 17,76"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#BDEBD5"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round" />
+
+    <!-- A friendly parrot silhouette facing the sound direction. -->
+    <path
+        android:pathData="M34,79 C29,70 27,58 30,46 C33,33 44,25 57,25 C70,25 79,35 80,48 C81,59 75,68 65,73 C59,76 56,82 56,87 L40,87 C40,83 37,81 34,79 Z"
+        android:fillColor="#F4FFF9" />
+    <path
+        android:pathData="M40,77 C37,65 39,51 48,43 C54,55 61,64 70,68 C66,73 60,75 56,80 C51,77 46,76 40,77 Z"
+        android:fillColor="#80D5AE" />
+
+    <!-- Warm beak and clear eye keep the parrot recognizable at launcher size. -->
+    <path
+        android:pathData="M73,39 C82,41 89,46 92,51 C87,57 80,61 72,62 C76,56 77,47 73,39 Z"
+        android:fillColor="#F4A340" />
+    <path
+        android:pathData="M62,38 A5,5 0,1 0,62,48 A5,5 0,1 0,62,38"
+        android:fillColor="#17362B" />
+    <path
+        android:pathData="M63,39 A1.7,1.7 0,1 0,63,42.4 A1.7,1.7 0,1 0,63,39"
+        android:fillColor="#FFFFFF" />
+</vector>
