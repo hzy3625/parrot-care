@@ -13,7 +13,9 @@ Activity + XML Views
        ↓
 small Java use-case classes
        ↓
-SQLiteOpenHelper + app-private files + MediaRecorder
+SQLiteOpenHelper + app-private files
+       ↓
+MediaRecorder / MediaPlayer / MediaExtractor + MediaCodec
        ↓
 optional HttpURLConnection sync adapter (future)
 ```
@@ -22,6 +24,9 @@ optional HttpURLConnection sync adapter (future)
 - Domain: plain Java value objects and use-case classes without Android dependencies where practical.
 - Storage: event metadata in SQLite; audio in `Context.getFilesDir()` with paths stored in SQLite.
 - Audio: AAC in an MPEG-4 container using a low bitrate suitable for voice-like parrot recordings.
+- Baseline comparison: `MediaExtractor` and `MediaCodec` decode audio locally; small Java classes calculate dBFS loudness, peak level, and active-sample ratio against the same parrot's recent daily baselines.
+- Analysis boundary: the current comparison is an explainable change indicator, not ML classification or medical diagnosis. Audio never leaves the device for this flow.
+- Branding: adaptive and legacy vector launcher resources live under `res/mipmap-anydpi*`; no raster asset library is bundled.
 - Network: absent from core flows. A future adapter may use `HttpURLConnection`; remote failure must not roll back local saves.
 
 ## Size constraints
@@ -38,4 +43,4 @@ Database migrations are forward-only. Audio files use app-private storage, so no
 
 ## Release
 
-Source lives in `apps/mobile/android`. `make android-release` writes a versioned, locally installable APK to `apps/mobile/release/android`. Local signing keys and binary artifacts are ignored; production signing credentials remain external.
+Source lives in `apps/mobile/android`. `make android-release` writes a versioned, locally installable APK to `apps/mobile/release/android`. Local signing keys and binary artifacts are ignored; production signing credentials remain external. The current release is `0.3.1`.

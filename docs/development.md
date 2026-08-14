@@ -29,7 +29,14 @@ make verify-docker
 make docker-down
 ```
 
-Android 包装源码位于 `apps/mobile/android`，发布产物位于 `apps/mobile/release/android`。当前尚未选定原生包装工具链，选择后必须在该目录补充可复现构建命令。
+Android 原生源码位于 `apps/mobile/android`，发布产物位于 `apps/mobile/release/android`。当前使用 Java 17、Android SDK 35、Build Tools 35.0.0 和直接 SDK 构建脚本，不需要下载 Gradle 依赖：
+
+```bash
+make check-android
+make android-release
+```
+
+当前 Android 版本为 `0.3.1`。APK 使用版本化文件名，二进制和本地签名密钥均由 Git 忽略。
 
 ## 修改闭环
 
@@ -40,4 +47,4 @@ Android 包装源码位于 `apps/mobile/android`，发布产物位于 `apps/mobi
 5. 启动应用验证真实用户流程。
 6. 更新与行为变化直接相关的当前文档。
 
-不要在 Android 包装层复制 Web 页面或本地业务逻辑。
+Android 是独立的原生本地应用，不是 Web 包装层。不要复制 Web 页面，也不要让录音、基线对比和记录管理依赖 API。

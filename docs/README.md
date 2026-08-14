@@ -5,12 +5,12 @@
 | 文档 | 何时阅读 |
 | --- | --- |
 | `architecture/repository.md` | 理解 monorepo 边界和依赖方向 |
-| `architecture/local-first.md` | 修改移动端存储、录音、同步或 PWA |
-| `architecture/native-android.md` | 修改 Android 原生架构、权限、存储或发布 |
+| `architecture/local-first.md` | 修改 Web/PWA 或 Android 的本地存储、录音与可选同步边界 |
+| `architecture/native-android.md` | 修改 Android 原生架构、权限、音频基线对比、图标或发布 |
 | `development.md` | 搭建环境、启动服务和使用统一命令 |
 | `testing/verification.md` | 决定改动需要运行哪些检查 |
 | `requirements/data-collection-plan.md` | 处理音频数据采集计划 |
-| `requirements/mobile-basic-features.md` | 开发 Android 本地录音、记录管理和备份功能 |
+| `requirements/mobile-basic-features.md` | 开发 Android 录音、日常基线、声音变化对比、记录管理和备份功能 |
 | `requirements/req-019-data-collection-prep.md` | 修改训练数据准备流程 |
 | `requirements/req-019-xenocanto-evaluation.md` | 使用 Xeno-Canto 数据工具 |
 

@@ -8,6 +8,7 @@ Minimal Android SDK application for the local-first mobile workflow:
 - `MediaPlayer` for local playback;
 - local parrot profiles, audio/manual records, recording timer, basic import validation, filters, detail editing, and ZIP backup/import;
 - local daily-baseline recording and explainable sound-change comparison using platform audio decoding;
+- adaptive and legacy vector launcher icons representing a parrot and sound waves;
 - no external dependencies or cross-platform runtime;
 - direct Android SDK build with no dependency download step.
 
@@ -25,4 +26,4 @@ With a USB-debugging device connected:
 apps/mobile/android/scripts/device-smoke-test.sh
 ```
 
-This installs the latest local release APK, launches the app, and prints recent app logs. Manual verification is still required for recording, importing, editing, deleting, and backup restore flows.
+This installs the latest local release APK, launches the app, and prints recent app logs. The 0.2.1 recording and local-record workflow has passed basic device verification. The 0.3.x daily-baseline comparison flow still requires device verification with multiple recordings made under comparable conditions.

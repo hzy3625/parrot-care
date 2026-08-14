@@ -10,7 +10,7 @@ apps/web  ──本地数据──> IndexedDB
 
 ml/training ──共享特征定义──> apps/api/app/services
 infra       ──构建──> apps/web + apps/api + ml/models
-apps/mobile ──原生本地存储──> Android SQLite / app-private files
+apps/mobile ──原生本地存储与分析──> Android SQLite / app-private files / MediaCodec
 ```
 
 `apps/web` 是可独立运行的产品，不依赖 API 才能保存核心记录。`apps/api` 不反向依赖 Web。训练脚本复用 API 的特征定义，避免训练和推理的类别或维度漂移。基础设施只负责组装，不承载业务逻辑。
@@ -21,7 +21,7 @@ apps/mobile ──原生本地存储──> Android SQLite / app-private files
 - API 路由 → services → models/db；路由不得绕过服务层复用业务规则。
 - ML training → API audio feature/model definitions；API 只读取 canonical model。
 - Infra → apps 与 model artifact；apps 不导入 infra。
-- Android 使用原生 Java/Android SDK 独立实现同一产品行为契约，不依赖 Web 运行时。
+- Android 使用原生 Java/Android SDK 独立实现录音、日常基线和本地声音变化对比，不依赖 Web 运行时或 API。
 
 ## 所有权
 

@@ -2,7 +2,7 @@
 
 ## 目标
 
-ParrotCare 使用一套 React PWA 同时服务桌面端和移动端。移动端不是后端 Web 页的缩小版，而是能够独立运行的本地优先应用：没有网络、FastAPI、PostgreSQL 或 MinIO 时，核心护理记录流程仍然成立。
+ParrotCare 同时提供 React PWA 和原生 Android 应用。Android 不是后端 Web 页的缩小版，而是能够独立运行的本地优先应用：没有网络、FastAPI、PostgreSQL 或 MinIO 时，录音、日常基线、声音变化对比和护理记录流程仍然成立。
 
 ## 当前数据流
 
@@ -20,7 +20,7 @@ localRepository
 
 ## 平台策略
 
-### 移动端
+### Web/PWA
 
 - PWA manifest 与 Service Worker 缓存应用壳。
 - Hash 路由支持静态文件托管、子目录部署和离线启动。
@@ -29,6 +29,15 @@ localRepository
 - 页面底部固定主导航，交互目标按触摸场景设计。
 
 安装 PWA 与使用麦克风需要安全上下文：生产环境使用 HTTPS；本机开发可使用 localhost。浏览器清除站点数据会删除本地记录，因此后续应增加显式导出/备份功能。
+
+### 原生 Android
+
+- Java/XML 和 Android 平台 API，无 WebView 或跨平台运行时。
+- `MediaRecorder` 录音，`MediaPlayer` 播放，SQLite 与 App 私有文件保存数据。
+- ZIP 备份支持换机迁移，不包含凭据或设备标识。
+- `MediaExtractor`、`MediaCodec` 和小型 Java 比较器在本机完成声音基线对比。
+- 当前对比使用响度、峰值和声音活跃占比，只提供变化线索，不输出疾病诊断。
+- 自适应矢量启动图标表达“鹦鹉 + 声音观察”的产品定位。
 
 ### 桌面端
 
