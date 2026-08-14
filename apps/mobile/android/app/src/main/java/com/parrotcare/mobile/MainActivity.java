@@ -25,6 +25,9 @@ import android.widget.Toast;
 
 import com.parrotcare.mobile.audio.AudioPlayer;
 import com.parrotcare.mobile.audio.AudioRecorder;
+import com.parrotcare.mobile.audio.AudioFeatureExtractor;
+import com.parrotcare.mobile.audio.AudioFeatures;
+import com.parrotcare.mobile.audio.BaselineComparison;
 import com.parrotcare.mobile.data.AudioFileStore;
 import com.parrotcare.mobile.data.BackupStore;
 import com.parrotcare.mobile.data.LocalStore;
@@ -35,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -69,12 +73,14 @@ public final class MainActivity extends Activity {
 
     private final AudioRecorder recorder = new AudioRecorder();
     private final AudioPlayer player = new AudioPlayer();
+    private final AudioFeatureExtractor featureExtractor = new AudioFeatureExtractor();
     private LocalStore store;
     private AudioFileStore files;
     private BackupStore backupStore;
     private SharedPreferences preferences;
     private ScrollView currentScrollView;
     private File pendingAudio;
+    private String pendingRecordingPurpose = "abnormal";
     private long recordingStartedAt;
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
     private TextView recordingTimerText;
@@ -111,9 +117,19 @@ public final class MainActivity extends Activity {
         root.addView(note("本地优先的鹦鹉声音与健康观察记录。核心功能离线可用。"));
 
         root.addView(card("记录", "高频操作：录制声音、导入音频或记录无音频观察。"));
-        root.addView(primaryButton("录制声音", v -> requestRecording()));
+        root.addView(primaryButton("记录异常声音", v -> requestRecording("abnormal")));
         root.addView(secondaryButton("导入音频", v -> pickAudio()));
         root.addView(secondaryButton("新建观察", v -> showSaveEvent(null, "manual", 0L, "manual")));
+
+        String currentId = currentParrotId();
+        ParrotProfile currentParrot = store.getParrot(currentId);
+        int baselineCount = store.countBaselineAudioEvents(currentId);
+        String parrotName = currentParrot == null ? "当前鹦鹉" : currentParrot.name;
+        String baselineHint = baselineCount >= 3
+            ? "已经可以用于声音变化对比。"
+            : "建议至少录制 3 条，环境和手机位置尽量保持一致。";
+        root.addView(card("日常声音基线", parrotName + "已有 " + baselineCount + " 条基线。" + baselineHint));
+        root.addView(secondaryButton("录制日常基线", v -> requestRecording("baseline")));
 
         root.addView(card("记录库", "查看最近记录或进入全部记录。"));
         List<ParrotEvent> recent = store.recentEvents(5);
@@ -187,7 +203,8 @@ public final class MainActivity extends Activity {
         setRoot(root, 0);
     }
 
-    private void requestRecording() {
+    private void requestRecording(String purpose) {
+        pendingRecordingPurpose = "baseline".equals(purpose) ? "baseline" : "abnormal";
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO_REQUEST);
             return;
@@ -234,7 +251,7 @@ public final class MainActivity extends Activity {
         }
         pendingAudio = audio;
         long measured = files.durationMs(audio);
-        showSaveEvent(audio, "recording", measured > 0 ? measured : duration, "abnormal");
+        showSaveEvent(audio, "recording", measured > 0 ? measured : duration, pendingRecordingPurpose);
     }
 
     private void cancelRecording() {
@@ -286,7 +303,7 @@ public final class MainActivity extends Activity {
             root.addView(secondaryButton(source.equals("recording") ? "重新录制" : "重新导入", v -> {
                 files.deleteQuietly(audio);
                 pendingAudio = null;
-                if (source.equals("recording")) requestRecording(); else pickAudio();
+                if (source.equals("recording")) requestRecording(defaultPurpose); else pickAudio();
             }));
         }
         root.addView(primaryButton("保存记录", v -> {
@@ -377,6 +394,11 @@ public final class MainActivity extends Activity {
             File audio = files.resolve(event.audioPath);
             if (audio != null && audio.exists()) {
                 root.addView(secondaryButton("播放 / 暂停", v -> play(audio)));
+                if ("baseline".equals(event.purpose)) {
+                    root.addView(note("这条记录作为日常基线，可供后续异常声音对比。"));
+                } else {
+                    root.addView(primaryButton("与日常基线对比", v -> compareWithBaseline(event)));
+                }
             } else {
                 root.addView(note("音频文件缺失，仍可编辑或删除记录。"));
             }
@@ -418,6 +440,88 @@ public final class MainActivity extends Activity {
                 showLibrary(0);
             })
             .show();
+    }
+
+    private void compareWithBaseline(ParrotEvent event) {
+        File currentAudio = files.resolve(event.audioPath);
+        List<ParrotEvent> baselineEvents = store.baselineAudioEvents(event.parrotId, event.id, 5);
+        if (currentAudio == null || !currentAudio.isFile()) {
+            toast("当前音频文件不可用");
+            return;
+        }
+        if (baselineEvents.isEmpty()) {
+            new AlertDialog.Builder(this)
+                .setTitle("还没有日常基线")
+                .setMessage("请先为这只鹦鹉录制日常状态下的声音。建议在相似距离和环境下积累至少 3 条。")
+                .setNegativeButton("稍后", null)
+                .setPositiveButton("去录制", (dialog, which) -> requestRecording("baseline"))
+                .show();
+            return;
+        }
+
+        LinearLayout loading = base("声音变化对比");
+        loading.addView(note("正在本机分析当前录音，并与最近的日常基线比较…"));
+        loading.addView(secondaryButton("返回详情", v -> showDetail(store.getEvent(event.id), 0)));
+        setRoot(loading, 0);
+
+        new Thread(() -> {
+            try {
+                AudioFeatures current = featureExtractor.extract(currentAudio);
+                List<AudioFeatures> references = new ArrayList<>();
+                for (ParrotEvent baselineEvent : baselineEvents) {
+                    File baselineAudio = files.resolve(baselineEvent.audioPath);
+                    if (baselineAudio == null || !baselineAudio.isFile()) continue;
+                    try {
+                        references.add(featureExtractor.extract(baselineAudio));
+                    } catch (IOException ignored) {
+                        // A damaged reference is skipped; valid baseline recordings still participate.
+                    }
+                }
+                if (references.isEmpty()) throw new IOException("日常基线音频不可用");
+                BaselineComparison.Result result = BaselineComparison.compare(current, references);
+                runOnUiThread(() -> showComparisonResult(event, result));
+            } catch (IOException | RuntimeException error) {
+                runOnUiThread(() -> {
+                    toast("声音对比失败：" + error.getMessage());
+                    showDetail(store.getEvent(event.id), 0);
+                });
+            }
+        }, "parrot-audio-comparison").start();
+    }
+
+    private void showComparisonResult(ParrotEvent event, BaselineComparison.Result result) {
+        LinearLayout root = base("声音变化对比");
+        LinearLayout summary = panel();
+        summary.addView(section(result.level));
+        summary.addView(body("参考了同一只鹦鹉最近 " + result.referenceCount + " 条有效日常基线。"));
+        if (result.referenceCount < 3) {
+            summary.addView(note("当前参考较少，建议积累至少 3 条日常基线后再判断趋势。"));
+        }
+        root.addView(summary);
+
+        LinearLayout details = panel();
+        details.addView(section("变化明细"));
+        details.addView(body(
+            "整体响度：" + signed(result.loudnessDelta, " dB") + "\n" +
+            "声音活跃占比：" + signed(result.activityDelta * 100.0d, " 个百分点") + "\n" +
+            "声音峰值：" + signed(result.peakDelta, " dB")
+        ));
+        details.addView(body("正数表示比日常基线更响或更活跃，负数表示更轻或更安静。"));
+        root.addView(details);
+
+        LinearLayout guidance = panel();
+        guidance.addView(section("如何使用结果"));
+        guidance.addView(body(
+            "先确认录音距离、手机位置和环境噪声是否与基线接近。若变化持续出现，再结合食欲、精神、羽毛和排泄情况记录观察；必要时咨询专业兽医。"
+        ));
+        guidance.addView(note("这是本地声音变化提示，不是疾病识别或医疗诊断。"));
+        root.addView(guidance);
+        root.addView(primaryButton("返回记录详情", v -> showDetail(store.getEvent(event.id), 0)));
+        setRoot(root, 0);
+    }
+
+    private String signed(double value, String unit) {
+        return String.format(Locale.CHINA, "%+.1f%s", value, unit);
     }
 
     private void exportBackup() {

@@ -7,6 +7,7 @@ Minimal Android SDK application for the local-first mobile workflow:
 - `MediaRecorder` for local AAC recording;
 - `MediaPlayer` for local playback;
 - local parrot profiles, audio/manual records, recording timer, basic import validation, filters, detail editing, and ZIP backup/import;
+- local daily-baseline recording and explainable sound-change comparison using platform audio decoding;
 - no external dependencies or cross-platform runtime;
 - direct Android SDK build with no dependency download step.
 

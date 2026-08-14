@@ -11,8 +11,10 @@ APK/AAB files are ignored by Git. Record release version, commit, checksum, sign
 Current local release target:
 
 ```text
-parrot-care-v0.2.1.apk
+parrot-care-v0.3.0.apk
 ```
+
+0.2.1 completed basic Android device verification. 0.3.0 adds the first core sound workflow: daily baseline recording and local comparison of loudness, peak level, and sound activity.
 
 Device smoke test:
 

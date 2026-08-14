@@ -231,6 +231,26 @@ public final class LocalStore extends SQLiteOpenHelper {
         return queryEvents(null, new String[0], "events.created_at DESC LIMIT " + limit);
     }
 
+    public List<ParrotEvent> baselineAudioEvents(String parrotId, String excludedEventId, int limit) {
+        String safeLimit = String.valueOf(Math.max(1, Math.min(limit, 10)));
+        return queryEvents(
+            "events.parrot_id=? AND events.purpose='baseline' AND events.audio_path IS NOT NULL " +
+                "AND events.audio_path<>'' AND events.id<>?",
+            new String[]{parrotId, excludedEventId == null ? "" : excludedEventId},
+            "events.created_at DESC LIMIT " + safeLimit
+        );
+    }
+
+    public int countBaselineAudioEvents(String parrotId) {
+        try (Cursor cursor = getReadableDatabase().rawQuery(
+            "SELECT COUNT(*) FROM events WHERE parrot_id=? AND purpose='baseline' " +
+                "AND audio_path IS NOT NULL AND audio_path<>''",
+            new String[]{parrotId}
+        )) {
+            return cursor.moveToFirst() ? cursor.getInt(0) : 0;
+        }
+    }
+
     private List<ParrotEvent> queryEvents(String where, String[] args, String order) {
         List<ParrotEvent> events = new ArrayList<>();
         String sql =
